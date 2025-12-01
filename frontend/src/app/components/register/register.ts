@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { RegisterRequest } from '../../models/user.model';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -26,7 +27,8 @@ export class Register {
 
   constructor(
     private authService: Auth,
-    private router: Router
+    private router: Router,
+    private cdRef: ChangeDetectorRef
   ) {}
 
   onSubmit(): void {
@@ -48,16 +50,18 @@ export class Register {
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
+  this.errorMessage = '';
 
-    this.authService.register(this.userData).subscribe({
-      next: () => {
-        this.router.navigate(['/tasks']);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
-      }
-    });
+  this.authService.register(this.userData).subscribe({
+    next: () => {
+      this.isLoading = false; // Reset after success
+      this.router.navigate(['/tasks']);
+    },
+    error: (error) => {
+      this.isLoading = false;
+      this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+      this.cdRef.detectChanges(); // 👈 Explicitly force view update
+    }
+  });
   }
 }

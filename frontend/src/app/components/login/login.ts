@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -25,7 +25,8 @@ export class Login {
   constructor(
     private authService: Auth,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdRef: ChangeDetectorRef
   ) {
     // Get return url from route parameters or default to '/tasks'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tasks';
@@ -42,11 +43,14 @@ export class Login {
 
     this.authService.login(this.credentials).subscribe({
       next: () => {
+        // Note: this.isLoading = false is not strictly necessary here 
+        // as the router navigation will destroy the component shortly.
         this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = error.error?.message || 'Login failed. Please check your credentials.';
+        this.cdRef.detectChanges(); // 👈 Force the view to update immediately
       }
     });
   }
