@@ -1,1 +1,32 @@
-<p>header works!</p>
+<header class="header">
+  <div class="header-content">
+    <div class="logo">
+      <a routerLink="/">
+        <span class="logo-icon">📋</span>
+        <span class="logo-text">TaskManager</span>
+      </a>
+    </div>
+    
+    <nav class="nav">
+      @if (isAuthenticated()) {
+        <a routerLink="/tasks" routerLinkActive="active" class="nav-link">
+          Tasks
+        </a>
+        
+        <div class="user-menu">
+          <span class="user-name">{{ userDisplayName() }}</span>
+          <button class="btn-logout" (click)="onLogout()">
+            Logout
+          </button>
+        </div>
+      } @else {
+        <a routerLink="/login" routerLinkActive="active" class="nav-link">
+          Login
+        </a>
+        <a routerLink="/register" routerLinkActive="active" class="nav-link">
+          Register
+        </a>
+      }
+    </nav>
+  </div>
+</header>
