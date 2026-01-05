@@ -1,26 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity'
+import { Task } from './entities/task.entity';
 
 @Injectable()
 export class TaskService {
+  constructor(private readonly taskRepository: Repository<Task>){}
+
   create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+    const res = this.taskRepository.save(createTaskDto)
+    return res;
   }
 
-  findAll() {
-    return `This action returns all task`;
+  async findAll() {
+    const tasks = await this.taskRepository.find(); 
+    return tasks;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+async findOne(id: number) {
+  // 1. Fetch the task from the database using the ID
+  const task = await this.taskRepository.findOne({
+    where: { id },
+    relations: ['assignedTo'] // Optional: includes the user details
+  });
+
+}
+
+  async update(id: number, updateTaskDto: UpdateTaskDto) {
+
+    const newTask = await this.taskRepository.preload({id, ...updateTaskDto}) 
+    if (!newTask) throw new NotFoundException('Element not found');
+        this.taskRepository.save(newTask);
+        return newTask;
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: number) {
+     const deleteResult = await this.taskRepository.
+        softDelete(id);
+        if (!deleteResult.affected) throw new NotFoundException();
+        return {count: deleteResult.affected };
   }
 }
