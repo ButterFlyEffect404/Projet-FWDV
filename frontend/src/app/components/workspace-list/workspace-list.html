@@ -1,0 +1,93 @@
+<div class="workspace-list-container">
+  <!-- Header -->
+  <div class="workspace-list-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Workspaces</h1>
+        <p class="subtitle">Manage and organize your workspaces</p>
+      </div>
+      <button class="btn btn-primary" (click)="addNewWorkspace()">
+        <span class="plus-icon">+</span> New Workspace
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading workspaces...</p>
+  </div>
+
+  <!-- Search Bar -->
+  <div *ngIf="!isLoading" class="search-section">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        placeholder="Search workspaces by name or description..."
+        (input)="onSearchChange($event.target.value)"
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+
+  <!-- Workspaces Grid -->
+  <div *ngIf="!isLoading" class="workspaces-section">
+    <div *ngIf="filteredWorkspaces().length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h2>No workspaces found</h2>
+      <p>{{ searchQuery() ? 'Try adjusting your search' : 'Create your first workspace to get started' }}</p>
+    </div>
+
+    <div *ngIf="filteredWorkspaces().length > 0" class="workspaces-grid">
+      <div 
+        *ngFor="let workspace of filteredWorkspaces()"
+        class="workspace-card"
+        (click)="viewWorkspace(workspace.id)"
+      >
+        <div class="workspace-header">
+          <div class="workspace-icon">💼</div>
+          <div class="workspace-name-section">
+            <h3 class="workspace-name">{{ workspace.name }}</h3>
+            <p class="workspace-id">ID: {{ workspace.id.substring(0, 8) }}...</p>
+          </div>
+        </div>
+
+        <p class="workspace-description">{{ workspace.description }}</p>
+
+        <div class="workspace-meta">
+          <div class="meta-item">
+            <span class="meta-label">Members</span>
+            <span class="meta-value">{{ workspace.members.length }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Created</span>
+            <span class="meta-value">{{ workspace.createdAt | date: 'MMM d, y' }}</span>
+          </div>
+        </div>
+
+        <div class="workspace-actions">
+          <button 
+            class="action-btn view-btn"
+            (click)="viewWorkspace(workspace.id); $event.stopPropagation()"
+            title="View workspace"
+          >
+            👁️ View
+          </button>
+          <button 
+            class="action-btn delete-btn"
+            (click)="deleteWorkspace(workspace.id); $event.stopPropagation()"
+            title="Delete workspace"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
