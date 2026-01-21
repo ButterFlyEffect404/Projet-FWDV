@@ -1,0 +1,157 @@
+<div class="workspace-detail-container">
+  <!-- Header with Back Button -->
+  <div class="detail-header">
+    <button class="btn-back" (click)="goBack()">
+      ← Back to Workspaces
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading workspace...</p>
+  </div>
+
+  <!-- Workspace Detail -->
+  <div *ngIf="!isLoading && workspace()" class="detail-content">
+    <!-- Main Header Section -->
+    <div class="workspace-header-section">
+      <div class="header-top">
+        <div class="header-icon-section">
+          <div class="workspace-icon-large">💼</div>
+          <div>
+            <h1 class="workspace-title">{{ workspace()!.name }}</h1>
+            <p class="workspace-id">Workspace ID: {{ workspace()!.id }}</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button 
+            class="btn btn-secondary"
+            (click)="toggleEdit()"
+          >
+            {{ isEditing ? '✕ Cancel' : '✏️ Edit' }}
+          </button>
+          <button 
+            class="btn btn-danger"
+            (click)="deleteWorkspace()"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Left Column: Details -->
+      <div class="left-column">
+        <!-- Description Section -->
+        <div class="section card">
+          <div class="section-header">
+            <h2>Description</h2>
+          </div>
+          <div *ngIf="!isEditing" class="section-content">
+            <p class="description-text">{{ workspace()!.description || 'No description provided' }}</p>
+          </div>
+          <div *ngIf="isEditing" class="edit-form">
+            <div class="form-group">
+              <label>Workspace Name</label>
+              <input 
+                type="text" 
+                [(ngModel)]="editForm().name"
+                class="form-input"
+              />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea 
+                [(ngModel)]="editForm().description"
+                class="form-textarea"
+                rows="4"
+              ></textarea>
+            </div>
+            <div class="edit-actions">
+              <button class="btn btn-primary" (click)="saveChanges()">
+                💾 Save Changes
+              </button>
+              <button class="btn btn-secondary" (click)="toggleEdit()">
+                ✕ Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="section card">
+          <div class="section-header">
+            <h2>Information</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Created</span>
+              <span class="info-value">{{ workspace()!.createdAt | date: 'MMM d, y - HH:mm' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Last Updated</span>
+              <span class="info-value">{{ workspace()!.updatedAt | date: 'MMM d, y - HH:mm' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Owner ID</span>
+              <span class="info-value">{{ workspace()!.ownerId.substring(0, 8) }}...</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Total Members</span>
+              <span class="info-value">{{ workspace()!.members.length }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Members -->
+      <div class="right-column">
+        <div class="section card">
+          <div class="section-header">
+            <h2>Members</h2>
+            <span class="member-count">{{ workspace()!.members.length }}</span>
+          </div>
+          <div class="members-list">
+            <div *ngFor="let member of workspace()!.members" class="member-item">
+              <div class="member-icon">👤</div>
+              <div class="member-info">
+                <p class="member-id">{{ member }}</p>
+                <p class="member-role" [class.owner]="member === workspace()!.ownerId">
+                  {{ member === workspace()!.ownerId ? 'Owner' : 'Member' }}
+                </p>
+              </div>
+              <button 
+                *ngIf="member !== workspace()!.ownerId"
+                class="btn-remove"
+                (click)="removeMember(member)"
+                title="Remove member"
+              >
+                ✕
+              </button>
+            </div>
+            <div *ngIf="workspace()!.members.length === 0" class="empty-members">
+              <p>No members in this workspace</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!isLoading && !workspace()" class="empty-state">
+    <div class="empty-icon">❌</div>
+    <h2>Workspace not found</h2>
+    <button class="btn btn-primary" (click)="goBack()">
+      Go Back
+    </button>
+  </div>
+</div>

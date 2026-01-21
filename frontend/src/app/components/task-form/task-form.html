@@ -1,1 +1,152 @@
-<p>task-form works!</p>
+<div class="task-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h1>{{ isEditMode() ? 'Edit Task' : 'Create New Task' }}</h1>
+    <p class="subtitle">{{ isEditMode() ? 'Update task details' : 'Add a new task to your list' }}</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading task...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage() && !isLoading()" class="alert alert-error">
+    <span class="alert-icon">⚠️</span>
+    {{ errorMessage() }}
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage() && !isLoading()" class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    {{ successMessage() }}
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading()" class="task-form">
+    <!-- Title -->
+    <div class="form-group">
+      <label for="title" class="form-label">Task Title *</label>
+      <input
+        type="text"
+        id="title"
+        formControlName="title"
+        class="form-input"
+        placeholder="Enter task title"
+        [class.input-error]="title?.invalid && title?.touched"
+      />
+      <div *ngIf="title?.invalid && title?.touched" class="error-message">
+        <span *ngIf="title?.errors?.['required']">Title is required</span>
+        <span *ngIf="title?.errors?.['minlength']">Title must be at least 3 characters</span>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description" class="form-label">Description *</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="form-textarea"
+        placeholder="Enter task description"
+        rows="5"
+        [class.input-error]="description?.invalid && description?.touched"
+      ></textarea>
+      <div *ngIf="description?.invalid && description?.touched" class="error-message">
+        <span *ngIf="description?.errors?.['required']">Description is required</span>
+        <span *ngIf="description?.errors?.['minlength']">Description must be at least 10 characters</span>
+      </div>
+    </div>
+
+    <!-- Status and Priority Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="status" class="form-label">Status *</label>
+        <select
+          id="status"
+          formControlName="status"
+          class="form-select"
+        >
+          <option value="TODO">To Do</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="priority" class="form-label">Priority *</label>
+        <select
+          id="priority"
+          formControlName="priority"
+          class="form-select"
+        >
+          <option value="LOW">Low</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HIGH">High</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Due Date -->
+    <div class="form-group">
+      <label for="dueDate" class="form-label">Due Date *</label>
+      <input
+        type="date"
+        id="dueDate"
+        formControlName="dueDate"
+        class="form-input"
+        [class.input-error]="dueDate?.invalid && dueDate?.touched"
+      />
+      <div *ngIf="dueDate?.invalid && dueDate?.touched" class="error-message">
+        <span *ngIf="dueDate?.errors?.['required']">Due date is required</span>
+      </div>
+    </div>
+
+    <!-- Assigned To -->
+    <div class="form-group">
+      <label for="assignedTo" class="form-label">Assigned To</label>
+      <input
+        type="text"
+        id="assignedTo"
+        formControlName="assignedTo"
+        class="form-input"
+        placeholder="Enter assignee name or ID"
+      />
+      <p class="form-hint">Optional: Leave empty to assign to yourself</p>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isSaving()"
+      >
+        <span *ngIf="!isSaving()">{{ isEditMode() ? 'Update Task' : 'Create Task' }}</span>
+        <span *ngIf="isSaving()">
+          <span class="spinner-small"></span>
+          Saving...
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSaving()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-tertiary"
+        (click)="resetForm()"
+        [disabled]="isSaving()"
+      >
+        Reset
+      </button>
+    </div>
+  </form>
+</div>
