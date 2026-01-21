@@ -11,7 +11,7 @@ import { FilterTaskDto } from './dto/filter-task.dto';
 @Injectable()
 export class TaskService extends GenericCrud<Task> {
 
-  constructor(private readonly taskRepository: Repository<Task>){
+  constructor(@InjectRepository(Task) private readonly taskRepository: Repository<Task>){
     super(taskRepository);
   }
 
