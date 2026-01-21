@@ -1,26 +1,35 @@
-import { IsString, IsOptional, ValidateNested, IsEnum } from "class-validator";
-import { Type } from "class-transformer";
-import { User } from "src/user/entities/user.entity";
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateTaskDto } from './create-task.dto';
+import { IsOptional, IsInt, Min, Max, IsString, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
+import { UpdateTaskDto } from './update-task.dto';
 
-// Assuming you have a TaskStatus enum
-export enum TaskStatus {
-    OPEN = 'OPEN',
-    IN_PROGRESS = 'IN_PROGRESS',
-    DONE = 'DONE',
-}
+export class FilterTaskDto extends PartialType(UpdateTaskDto) {
+  @IsOptional()
+  @IsString()
+  search?: string;
 
-export class FilterDto {
+  // Override or add ID-based filters for the URL
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  assignedToId?: number;
 
-    @IsOptional()
-    @IsEnum(TaskStatus)
-    status?: TaskStatus;
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  createdById?: number;
 
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => User)
-    assignedTo?: User;
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  pageSize?: number = 10;
 
-    @IsOptional()
-    @IsString()
-    search?: string;
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  pageNumber?: number = 1;
 }

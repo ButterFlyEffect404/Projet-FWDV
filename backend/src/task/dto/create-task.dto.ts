@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength, MinLength, IsDate, IsOptional, ValidateNested, IsUUID } from "class-validator";
+import { IsNotEmpty, IsString, MaxLength, MinLength, IsDate, IsOptional, ValidateNested, IsUUID, IsEnum } from "class-validator";
 import { Type } from "class-transformer";
 import { User } from "src/user/entities/user.entity";
 
@@ -14,6 +14,10 @@ export class CreateTaskDto {
     @IsNotEmpty()
     @MinLength(1)
     description: string; 
+
+    @IsEnum(['LOW', 'MEDIUM', 'HIGH']) // Added here
+    @IsNotEmpty()
+    priority: string;
 
     @IsOptional()
     @ValidateNested()

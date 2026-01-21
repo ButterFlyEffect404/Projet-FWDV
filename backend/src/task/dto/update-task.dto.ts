@@ -1,7 +1,10 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateTaskDto } from './create-task.dto';
+import { IsEnum, IsOptional } from 'class-validator';
 
 export class UpdateTaskDto extends PartialType(CreateTaskDto) {
-
-    //nothing
+    
+    @IsOptional()
+    @IsEnum(['TODO', 'IN_PROGRESS', 'DONE'])
+    status?: string;
 }
