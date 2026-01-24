@@ -10,6 +10,10 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter, HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform/transform.interceptor';
+import { LoggingInterceptor } from './common/interceptors/logging/logging.interceptor';
 
 async function bootstrap() {
   // Create the NestJS application
