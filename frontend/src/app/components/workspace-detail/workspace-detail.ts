@@ -86,6 +86,15 @@ export class WorkspaceDetail {
     this.router.navigate(['/workspaces']);
   }
 
+  addTask(): void {
+    const ws = this.workspace();
+    if (ws) {
+      this.router.navigate(['/task/new'], { 
+        queryParams: { workspaceId: ws.id } 
+      });
+    }
+  }
+
   deleteWorkspace(): void {
     const ws = this.workspace();
     if (ws && confirm('Are you sure you want to delete this workspace?')) {

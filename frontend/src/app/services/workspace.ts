@@ -13,32 +13,44 @@ export class WorkspaceService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Workspace[]> {
-    return this.http.get<Workspace[]>(this.apiUrl);
+    return this.http.get<Workspace[]>(this.apiUrl, {
+      withCredentials: true
+    });
   }
 
   getById(id: string): Observable<Workspace> {
-    return this.http.get<Workspace>(`${this.apiUrl}/${id}`,{
-        mode: 'cors',
+    return this.http.get<Workspace>(`${this.apiUrl}/${id}`, {
+      withCredentials: true
     });
   }
 
   create(workspace: Omit<Workspace, 'id' | 'createdAt' | 'updatedAt'>): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, workspace);
+    return this.http.post(`${this.apiUrl}`, workspace, {
+      withCredentials: true
+    });
   }
 
   update(id: string, workspace: Partial<Workspace>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, workspace);
+    return this.http.put(`${this.apiUrl}/${id}`, workspace, {
+      withCredentials: true
+    });
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`, {
+      withCredentials: true
+    });
   }
 
   addMember(workspaceId: string, userId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${workspaceId}/members`, { userId });
+    return this.http.post(`${this.apiUrl}/${workspaceId}/members`, { userId }, {
+      withCredentials: true
+    });
   }
 
   removeMember(workspaceId: string, userId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${workspaceId}/members/${userId}`);
+    return this.http.delete(`${this.apiUrl}/${workspaceId}/members/${userId}`, {
+      withCredentials: true
+    });
   }
 }

@@ -17,6 +17,13 @@ let users = [
     password: 'hashed_password_456',
     createdAt: new Date(),
     updatedAt: new Date()
+  },{
+    id: "buddurid",
+    name: 'buddurid Smith',
+    email: 'buddurid@example.com',
+    password: 'buddurid',
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 ];
 

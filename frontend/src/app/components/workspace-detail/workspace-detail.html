@@ -31,6 +31,13 @@
         </div>
         <div class="header-actions">
           <button 
+            class="btn btn-primary"
+            (click)="addTask()"
+            title="Add a new task to this workspace"
+          >
+            ➕ Add Task
+          </button>
+          <button 
             class="btn btn-secondary"
             (click)="toggleEdit()"
           >

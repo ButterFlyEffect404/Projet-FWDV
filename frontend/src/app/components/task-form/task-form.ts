@@ -2,8 +2,12 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Task as TaskService } from '../../services/task';
+import { TaskService } from '../../services/task';
+import { WorkspaceService } from '../../services/workspace';
+import { UserService } from '../../services/user';
 import { Task } from '../../models/task.model';
+import { Workspace } from '../../models/workspace.model';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-task-form',
@@ -19,10 +23,17 @@ export class TaskForm implements OnInit {
   successMessage = signal<string>('');
   isEditMode = signal<boolean>(false);
   taskId: number | null = null;
+  
+  // Dropdown data
+  workspaces = signal<Workspace[]>([]);
+  users = signal<User[]>([]);
+  preselectedWorkspaceId: string | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
     private taskService: TaskService,
+    private workspaceService: WorkspaceService,
+    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -30,6 +41,19 @@ export class TaskForm implements OnInit {
   }
 
   ngOnInit(): void {
+    // Load workspaces and users for dropdowns
+    this.loadWorkspaces();
+    this.loadUsers();
+    
+    // Check for preselected workspace from query params
+    this.route.queryParams.subscribe(params => {
+      if (params['workspaceId']) {
+        this.preselectedWorkspaceId = params['workspaceId'];
+        this.taskForm.patchValue({ workspaceId: params['workspaceId'] });
+      }
+    });
+    
+    // Check if editing existing task
     this.route.params.subscribe(params => {
       if (params['id'] && params['id'] !== 'new') {
         this.isEditMode.set(true);
@@ -49,31 +73,54 @@ export class TaskForm implements OnInit {
       status: ['TODO', Validators.required],
       priority: ['MEDIUM', Validators.required],
       dueDate: ['', Validators.required],
-      assignedTo: ['']
+      workspaceId: ['', Validators.required],
+      assignedToId: ['']
+    });
+  }
+
+  loadWorkspaces(): void {
+    this.workspaceService.getAll().subscribe({
+      next: (data: Workspace[]) => {
+        this.workspaces.set(data);
+      },
+      error: (error: any) => {
+        console.error('Error loading workspaces:', error);
+      }
+    });
+  }
+
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (data: User[]) => {
+        this.users.set(data);
+      },
+      error: (error: any) => {
+        console.error('Error loading users:', error);
+      }
     });
   }
 
   loadTask(id: number): void {
     this.isLoading.set(true);
-    // TODO: Implement task loading from service
-    // this.taskService.getTaskById(id).subscribe({
-    //   next: (task) => {
-    //     this.taskForm.patchValue({
-    //       title: task.title,
-    //       description: task.description,
-    //       status: task.status,
-    //       priority: task.priority,
-    //       dueDate: this.formatDateForInput(task.dueDate),
-    //       assignedTo: task.assignedTo?.id
-    //     });
-    //     this.isLoading.set(false);
-    //   },
-    //   error: (error) => {
-    //     this.errorMessage.set('Failed to load task');
-    //     this.isLoading.set(false);
-    //   }
-    // });
-    this.isLoading.set(false);
+    this.taskService.getById(id).subscribe({
+      next: (task: Task) => {
+        this.taskForm.patchValue({
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          dueDate: this.formatDateForInput(task.dueDate),
+          workspaceId: task.workspaceId,
+          assignedToId: task.assignedTo?.id || ''
+        });
+        this.isLoading.set(false);
+      },
+      error: (error: any) => {
+        this.errorMessage.set('Failed to load task');
+        this.isLoading.set(false);
+        console.error('Error loading task:', error);
+      }
+    });
   }
 
   onSubmit(): void {
@@ -87,21 +134,45 @@ export class TaskForm implements OnInit {
     this.successMessage.set('');
 
     const formData = this.taskForm.value;
+    const taskData = {
+      title: formData.title,
+      description: formData.description,
+      status: formData.status,
+      priority: formData.priority,
+      dueDate: formData.dueDate,
+      workspaceId: formData.workspaceId,
+      assignedToId: formData.assignedToId ? parseInt(formData.assignedToId, 10) : undefined,
+      createdBy: "buddurid",
+    };
 
     if (this.isEditMode() && this.taskId) {
       // Update task
-      // TODO: Implement update
-      console.log('Updating task:', this.taskId, formData);
-      this.isSaving.set(false);
-      this.successMessage.set('Task updated successfully!');
-      setTimeout(() => this.router.navigate(['/tasks']), 1500);
+      this.taskService.update(this.taskId, taskData).subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.successMessage.set('Task updated successfully!');
+          setTimeout(() => this.router.navigate(['/tasks']), 1500);
+        },
+        error: (error: any) => {
+          this.isSaving.set(false);
+          this.errorMessage.set('Failed to update task');
+          console.error('Error updating task:', error);
+        }
+      });
     } else {
       // Create new task
-      // TODO: Implement create
-      console.log('Creating task:', formData);
-      this.isSaving.set(false);
-      this.successMessage.set('Task created successfully!');
-      setTimeout(() => this.router.navigate(['/tasks']), 1500);
+      this.taskService.create(taskData).subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.successMessage.set('Task created successfully!');
+          setTimeout(() => this.router.navigate(['/tasks']), 1500);
+        },
+        error: (error: any) => {
+          this.isSaving.set(false);
+          this.errorMessage.set('Failed to create task');
+          console.error('Error creating task:', error);
+        }
+      });
     }
   }
 
