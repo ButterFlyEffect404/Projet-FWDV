@@ -10,7 +10,6 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter, HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform/transform.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging/logging.interceptor';
@@ -64,6 +63,17 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalFilters(
+    new HttpExceptionFilter(),
+    new AllExceptionsFilter(),
+  );
+
+  app.useGlobalInterceptors(
+    new TransformInterceptor(),
+    new LoggingInterceptor(),
+  );
+
 
   // Get port from environment variable or default to 3000
   const port = process.env.PORT || 3000;
