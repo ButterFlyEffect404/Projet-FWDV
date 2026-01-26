@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Workspace } from '../models/workspace.model';
+import { Task } from '../models/task.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -43,13 +44,19 @@ export class WorkspaceService {
   }
 
   addMember(workspaceId: string, userId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${workspaceId}/members`, { userId }, {
+    return this.http.post(`${this.apiUrl}/${workspaceId}/members`, { userId : Number(userId) }, {
       withCredentials: true
     });
   }
 
   removeMember(workspaceId: string, userId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${workspaceId}/members/${userId}`, {
+      withCredentials: true
+    });
+  }
+
+  getWorkspaceTasks(workspaceId: string): Observable<Task[]> {
+    return this.http.get<Task[]>(`${this.apiUrl}/${workspaceId}/tasks`, {
       withCredentials: true
     });
   }

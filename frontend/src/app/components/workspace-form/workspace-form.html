@@ -57,6 +57,25 @@
           <span class="form-hint">{{ formData().name.length }}/100 characters</span>
         </div>
 
+        <!-- Description Field -->
+        <div class="form-group">
+          <label for="description" class="form-label">
+            <span class="label-icon">📄</span>
+            Description
+          </label>
+          <textarea
+            id="description"
+            class="form-textarea"
+            placeholder="Enter workspace description"
+            [(ngModel)]="formData().description"
+            (change)="onFormDataChange('description', formData().description)"
+            name="description"
+            rows="4"
+            maxlength="500"
+          ></textarea>
+          <span class="form-hint">{{ formData().description.length }}/500 characters</span>
+        </div>
+
         <!-- Members Selection -->
         <div class="form-group">
           <label class="form-label">
