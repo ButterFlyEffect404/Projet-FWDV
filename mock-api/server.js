@@ -8,10 +8,17 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(function (req, res, next) {
-    // Website you wish to allow to connect
-    res.header('Access-Control-Allow-Origin', '*');
-
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    // Allow specific origin (required when using credentials)
+    res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    
     next();
 });
 // Logging middleware
@@ -25,7 +32,7 @@ const usersRouter = require('./routes/users');
 const workspacesRouter = require('./routes/workspaces');
 const tasksRouter = require('./routes/tasks');
 
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 app.use('/workspaces', workspacesRouter);
 app.use('/tasks', tasksRouter);
 

@@ -88,6 +88,25 @@
       </div>
     </div>
 
+    <!-- Workspace Selection -->
+    <div class="form-group">
+      <label for="workspaceId" class="form-label">Workspace *</label>
+      <select
+        id="workspaceId"
+        formControlName="workspaceId"
+        class="form-select"
+        [class.input-error]="taskForm.get('workspaceId')?.invalid && taskForm.get('workspaceId')?.touched"
+      >
+        <option value="">Select a workspace</option>
+        <option *ngFor="let workspace of workspaces()" [value]="workspace.id">
+          {{ workspace.name }}
+        </option>
+      </select>
+      <div *ngIf="taskForm.get('workspaceId')?.invalid && taskForm.get('workspaceId')?.touched" class="error-message">
+        <span *ngIf="taskForm.get('workspaceId')?.errors?.['required']">Workspace is required</span>
+      </div>
+    </div>
+
     <!-- Due Date -->
     <div class="form-group">
       <label for="dueDate" class="form-label">Due Date *</label>
@@ -105,15 +124,18 @@
 
     <!-- Assigned To -->
     <div class="form-group">
-      <label for="assignedTo" class="form-label">Assigned To</label>
-      <input
-        type="text"
-        id="assignedTo"
-        formControlName="assignedTo"
-        class="form-input"
-        placeholder="Enter assignee name or ID"
-      />
-      <p class="form-hint">Optional: Leave empty to assign to yourself</p>
+      <label for="assignedToId" class="form-label">Assigned To</label>
+      <select
+        id="assignedToId"
+        formControlName="assignedToId"
+        class="form-select"
+      >
+        <option value="">Unassigned</option>
+        <option *ngFor="let user of users()" [value]="user.id">
+          {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+        </option>
+      </select>
+      <p class="form-hint">Optional: Select a user to assign this task</p>
     </div>
 
     <!-- Form Actions -->

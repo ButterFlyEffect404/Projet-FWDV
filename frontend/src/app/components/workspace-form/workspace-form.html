@@ -1,0 +1,162 @@
+<div class="workspace-form-container">
+  <!-- Header with Back Button -->
+  <div class="form-header">
+    <button class="btn-back" (click)="goBack()">
+      ← Back
+    </button>
+    <h1 class="form-title">
+      {{ isEditing ? '✏️ Edit Workspace' : '➕ Create New Workspace' }}
+    </h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading workspace...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage && !isLoading" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!isLoading" class="form-wrapper">
+    <div class="form-card">
+      <!-- Workspace Icon Section -->
+      <div class="form-section icon-section">
+        <div class="large-icon">💼</div>
+        <p class="section-subtitle">{{ isEditing ? 'Update your workspace details' : 'Set up a new workspace' }}</p>
+      </div>
+
+      <!-- Form Fields -->
+      <form (ngSubmit)="onSubmit()" class="workspace-form">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name" class="form-label">
+            <span class="label-icon">📝</span>
+            Workspace Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            class="form-input"
+            placeholder="Enter workspace name"
+            [(ngModel)]="formData().name"
+            (change)="onFormDataChange('name', formData().name)"
+            name="name"
+            required
+            minlength="3"
+            maxlength="100"
+          />
+          <span class="form-hint">{{ formData().name.length }}/100 characters</span>
+        </div>
+
+        <!-- Description Field -->
+        <div class="form-group">
+          <label for="description" class="form-label">
+            <span class="label-icon">📄</span>
+            Description
+          </label>
+          <textarea
+            id="description"
+            class="form-textarea"
+            placeholder="Enter workspace description"
+            [(ngModel)]="formData().description"
+            (change)="onFormDataChange('description', formData().description)"
+            name="description"
+            rows="4"
+            maxlength="500"
+          ></textarea>
+          <span class="form-hint">{{ formData().description.length }}/500 characters</span>
+        </div>
+
+        <!-- Members Selection -->
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">👥</span>
+            Team Members
+          </label>
+          <div class="members-container">
+            <div *ngIf="availableMembers().length === 0" class="no-members">
+              <p>No members available</p>
+            </div>
+            <div *ngFor="let member of availableMembers()" class="member-checkbox">
+              <input
+                type="checkbox"
+                [id]="'member-' + member.id"
+                [checked]="isMemberSelected(member.id.toString())"
+                (change)="toggleMember(member.id.toString())"
+                class="checkbox-input"
+              />
+              <label [for]="'member-' + member.id" class="checkbox-label">
+                <span class="member-name">{{ member.firstName }} {{ member.lastName }}</span>
+                <span class="member-email">{{ member.email }}</span>
+              </label>
+            </div>
+          </div>
+          <span class="form-hint">{{ formData().members.length }} member(s) selected</span>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+          <span class="info-icon">ℹ️</span>
+          <div>
+            <p class="info-title">Workspace Details</p>
+            <p class="info-text">
+              {{ isEditing 
+                ? 'Update the workspace name and description. Other members will see these changes immediately.'
+                : 'Create a new workspace to collaborate with your team. You will be the owner of this workspace.'
+              }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="goBack()"
+            [disabled]="isSubmitting"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSubmitting || !formData().name"
+            [class.loading]="isSubmitting"
+          >
+            {{ isSubmitting 
+              ? (isEditing ? '⏳ Updating...' : '⏳ Creating...')
+              : (isEditing ? '💾 Update Workspace' : '✅ Create Workspace')
+            }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="preview-card">
+      <h3 class="preview-title">Preview</h3>
+      <div class="preview-box">
+        <div class="preview-header">
+          <div class="preview-icon">💼</div>
+          <div>
+            <h4 class="preview-name">{{ formData().name || 'Workspace Name' }}</h4>
+            <p class="preview-placeholder" *ngIf="!formData().name">Your workspace name will appear here</p>
+          </div>
+        </div>
+        <p class="preview-description">
+          {{ formData().description || 'Your workspace description will appear here...' }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

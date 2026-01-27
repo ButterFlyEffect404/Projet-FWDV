@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Task as TaskService } from '../../services/task';
+import { TaskService } from '../../services/task';
 import { Task } from '../../models/task.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,17 +36,18 @@ export class TaskList {
   loadTasks(): void {
     this.isLoading = true;
     this.taskService.getAll().subscribe({
-      next: (data) => {
+      next: (data: Task[]) => {
         this.tasks.set(data || []);
         this.applyFilters();
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.errorMessage = 'Failed to load tasks';
         console.error('Error loading tasks:', error);
-        this.isLoading = false;
       }
     });
+    this.isLoading = false;
+
   }
 
   applyFilters(): void {

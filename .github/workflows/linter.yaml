@@ -1,0 +1,22 @@
+name: Build, Test & Deploy
+
+on:
+  push:
+    branches: main
+
+jobs:
+  frontend-lint:
+    name: linter for Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: run lint
+        run: npm run lint

@@ -3,20 +3,28 @@ const { v4: uuidv4 } = require('uuid');
 // In-memory data store
 let users = [
   {
-    id: uuidv4(),
-    name: 'John Doe',
+    id: 1,
     email: 'john@example.com',
+    firstName: 'John',
+    lastName: 'Doe',
     password: 'hashed_password_123',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date()
   },
   {
-    id: uuidv4(),
-    name: 'Jane Smith',
+    id: 2,
     email: 'jane@example.com',
+    firstName: 'Jane',
+    lastName: 'Smith',
     password: 'hashed_password_456',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date()
+  },
+  {
+    id: 3,
+    email: 'buddurid@example.com',
+    firstName: 'Buddurid',
+    lastName: 'Smith',
+    password: 'buddurid',
+    createdAt: new Date()
   }
 ];
 
@@ -25,8 +33,8 @@ let workspaces = [
     id: uuidv4(),
     name: 'Default Workspace',
     description: 'My default workspace',
-    ownerId: users[0].id,
-    members: [users[0].id, users[1].id],
+    ownerId: users[0].id.toString(),
+    members: [users[0].id.toString(), users[1].id.toString()],
     createdAt: new Date(),
     updatedAt: new Date()
   },
@@ -34,8 +42,8 @@ let workspaces = [
     id: uuidv4(),
     name: 'Project Alpha',
     description: 'A workspace for Project Alpha',
-    ownerId: users[1].id,
-    members: [users[1].id],
+    ownerId: users[1].id.toString(),
+    members: [users[1].id.toString()],
     createdAt: new Date(),
     updatedAt: new Date()
   }
@@ -46,7 +54,7 @@ let tasks = [
     id: uuidv4(),
     title: 'Setup project structure',
     description: 'Create initial project folders and files',
-    status: 'completed',
+    status: 'DONE',
     priority: 'high',
     workspaceId: workspaces[0].id,
     assignedTo: users[0].id,
@@ -59,7 +67,7 @@ let tasks = [
     id: uuidv4(),
     title: 'Implement authentication',
     description: 'Add JWT-based authentication',
-    status: 'in-progress',
+    status: 'IN_PROGRESS',
     priority: 'high',
     workspaceId: workspaces[0].id,
     assignedTo: users[1].id,
@@ -72,7 +80,7 @@ let tasks = [
     id: uuidv4(),
     title: 'Design UI mockups',
     description: 'Create UI mockups for the application',
-    status: 'pending',
+    status: 'TODO',
     priority: 'medium',
     workspaceId: workspaces[1].id,
     assignedTo: users[1].id,

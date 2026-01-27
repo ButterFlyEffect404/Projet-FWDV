@@ -1,7 +1,7 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const router = express.Router();
-const { workspaces, users } = require('../data/store');
+const { workspaces, users, tasks } = require('../data/store');
 
 // GET all workspaces
 router.get('/', (req, res) => {
@@ -119,7 +119,7 @@ router.post('/:id/members', (req, res) => {
     });
   }
 
-  workspace.members.push(userId);
+  workspace.members.push(userId.toString());
   workspace.updatedAt = new Date();
 
   res.json(workspace);
@@ -147,6 +147,22 @@ router.delete('/:id/members/:userId', (req, res) => {
   workspace.updatedAt = new Date();
 
   res.json(workspace);
+});
+
+// GET tasks for a specific workspace
+router.get('/:id/tasks', (req, res) => {
+  const workspace = workspaces.find(w => w.id === req.params.id);
+
+  if (!workspace) {
+    return res.status(404).json({
+      message: 'Workspace not found'
+    });
+  }
+
+  // Filter tasks by workspaceId
+  const workspaceTasks = tasks.filter(t => t.workspaceId === req.params.id);
+
+  res.json(workspaceTasks);
 });
 
 module.exports = router;
