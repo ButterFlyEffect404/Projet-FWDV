@@ -3,7 +3,8 @@
  * This entity defines the structure of user data stored in MySQL
  * TypeORM decorators map this class to database columns
  */
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Workspace } from 'src/workspace/entities/workspace.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany } from 'typeorm';
 
 @Entity('users') // Table name in database will be 'users'
 export class User {
@@ -47,4 +48,9 @@ export class User {
    */
   @CreateDateColumn()
   createdAt: Date;
+
+    @ManyToMany(() => Workspace, workspace => workspace.users)
+  workspaces: Workspace[];
 }
+  
+

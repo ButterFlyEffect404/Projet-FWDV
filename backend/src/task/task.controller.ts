@@ -11,8 +11,8 @@ export class TaskController {
     @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createTaskDto: CreateTaskDto , @Request() req) {
-    const userName=req.user.username;
-    return this.taskService.create({...createTaskDto, createdBy: req.user});
+   
+    return this.taskService.create(createTaskDto , req.user);
   }
       @UseGuards(JwtAuthGuard)  
 
@@ -27,11 +27,11 @@ export class TaskController {
     return this.taskService.findOne(+id);
   }
 //useless route
-    @UseGuards(JwtAuthGuard)
-  @Get()
-  findByCriteria(@Body() filterDto: FilterTaskDto) {
-    return this.taskService.findByCriteria(filterDto);
-  }
+  //   @UseGuards(JwtAuthGuard)
+  // @Get()
+  // findByCriteria(@Body() filterDto: FilterTaskDto) {
+  //   return this.taskService.findByCriteria(filterDto);
+  // }
       @UseGuards(JwtAuthGuard)
 
   @Patch(':id')
@@ -45,10 +45,11 @@ export class TaskController {
     return this.taskService.remove(+id);
   }
   //useless route
-    @UseGuards(JwtAuthGuard)
-  @Delete()
-  DeleteByCriteria(@Body() filterDto: FilterTaskDto){
-    return this.taskService.deleteByCriteria(filterDto);
-  }
+//     @UseGuards(JwtAuthGuard)
+//   @Delete()
+//   DeleteByCriteria(@Body() filterDto: FilterTaskDto){
+//     return this.taskService.deleteByCriteria(filterDto);
+//   }
 
+// }
 }
