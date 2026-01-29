@@ -108,8 +108,8 @@
               <span class="info-value">{{ workspace()!.updatedAt | date: 'MMM d, y - HH:mm' }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Owner ID</span>
-              <span class="info-value">{{ workspace()!.ownerId.substring(0, 8) }}...</span>
+              <span class="info-label">Owner</span>
+              <span class="info-value">{{ getUserName(workspace()!.ownerId) }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Total Members</span>
@@ -124,29 +124,127 @@
         <div class="section card">
           <div class="section-header">
             <h2>Members</h2>
-            <span class="member-count">{{ workspace()!.members.length }}</span>
+            <div class="section-header-actions">
+              <span class="member-count">{{ memberUsers.length }}</span>
+              <button class="btn btn-sm btn-primary" (click)="openAddMemberModal()">
+                ➕ Add Members
+              </button>
+            </div>
           </div>
           <div class="members-list">
-            <div *ngFor="let member of workspace()!.members" class="member-item">
+            <div *ngFor="let member of memberUsers" class="member-item">
               <div class="member-icon">👤</div>
               <div class="member-info">
-                <p class="member-id">{{ member }}</p>
-                <p class="member-role" [class.owner]="member === workspace()!.ownerId">
-                  {{ member === workspace()!.ownerId ? 'Owner' : 'Member' }}
+                <p class="member-name">{{ member.firstName }} {{ member.lastName }}</p>
+                <p class="member-email">{{ member.email }}</p>
+                <p class="member-role" [class.owner]="member.id.toString() === workspace()!.ownerId">
+                  {{ member.id.toString() === workspace()!.ownerId ? 'Owner' : 'Member' }}
                 </p>
               </div>
               <button 
-                *ngIf="member !== workspace()!.ownerId"
+                *ngIf="member.id.toString() !== workspace()!.ownerId"
                 class="btn-remove"
-                (click)="removeMember(member)"
+                (click)="removeMember(member.id.toString())"
                 title="Remove member"
               >
                 ✕
               </button>
             </div>
-            <div *ngIf="workspace()!.members.length === 0" class="empty-members">
+            <div *ngIf="memberUsers.length === 0" class="empty-members">
               <p>No members in this workspace</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks Section -->
+    <div class="section card tasks-section">
+      <div class="section-header">
+        <h2>Tasks</h2>
+        <span class="task-count">{{ tasks().length }} task(s)</span>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoadingTasks" class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading tasks...</p>
+      </div>
+
+      <!-- Tasks Table -->
+      <div *ngIf="!isLoadingTasks && tasks().length > 0" class="tasks-table-container">
+        <table class="tasks-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Due Date</th>
+              <th>Assigned To</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of tasks()" class="task-row">
+              <td class="task-title">{{ task.title }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-' + task.status.toLowerCase()">
+                  {{ task.status }}
+                </span>
+              </td>
+              <td>
+                <span class="priority-badge" [class]="'priority-' + task.priority.toLowerCase()">
+                  {{ task.priority }}
+                </span>
+              </td>
+              <td class="task-date">
+                {{ task.dueDate | date: 'MMM d, y' }}
+              </td>
+              <td class="task-assigned">
+                {{ task.assignedTo ? getUserName(task.assignedTo) : 'Unassigned' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoadingTasks && tasks().length === 0" class="empty-tasks">
+        <div class="empty-icon">📋</div>
+        <p>No tasks in this workspace yet</p>
+        <button class="btn btn-primary" (click)="addTask()">
+          ➕ Create First Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Member Modal -->
+  <div *ngIf="showAddMemberModal" class="modal-overlay" (click)="closeAddMemberModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Members to Workspace</h3>
+        <button class="modal-close" (click)="closeAddMemberModal()">✕</button>
+      </div>
+      
+      <div class="modal-body">
+        <p class="modal-description">Select users to add to this workspace:</p>
+        
+        <div *ngIf="availableUsers.length === 0" class="no-users-message">
+          <p>All users are already members of this workspace.</p>
+        </div>
+        
+        <div *ngIf="availableUsers.length > 0" class="users-list">
+          <div 
+            *ngFor="let user of availableUsers" 
+            class="user-item"
+            (click)="addMemberToWorkspace(user.id)"
+          >
+            <div class="user-avatar">{{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}</div>
+            <div class="user-info">
+              <p class="user-name">{{ user.firstName }} {{ user.lastName }}</p>
+              <p class="user-email">{{ user.email }}</p>
+            </div>
+            <button class="btn-add-user">+ Add</button>
           </div>
         </div>
       </div>

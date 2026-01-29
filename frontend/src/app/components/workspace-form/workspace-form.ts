@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WorkspaceService } from '../../services/workspace';
 import { UserService } from '../../services/user';
+import { Auth } from '../../services/auth';
 import { User } from '../../models/user.model';
 import { Workspace } from '../../models/workspace.model';
 import { CommonModule } from '@angular/common';
@@ -31,6 +32,7 @@ export class WorkspaceForm {
   constructor(
     private workspaceService: WorkspaceService,
     private userService: UserService,
+    private auth: Auth,
     private router: Router,
     private route: ActivatedRoute,
     private cdRef: ChangeDetectorRef
@@ -109,33 +111,34 @@ export class WorkspaceForm {
   }
 
   createWorkspace(): void {
-    // For new workspace, we need an ownerId
-    // In a real app, this would come from the current user
-    // For now, we'll use a placeholder
-    const currentUserId = localStorage.getItem('current_user_id') || '1234';
+    const currentUser = this.auth.currentUser();
+    if (!currentUser) {
+      this.errorMessage = 'You must be logged in to create a workspace';
+      this.isSubmitting = false;
+      return;
+    }
 
     const newWorkspace = {
       name: this.formData().name,
       description: this.formData().description,
       members: this.formData().members,
-      ownerId: currentUserId
+      ownerId: currentUser.id.toString()
     };
 
     this.workspaceService.create(newWorkspace).subscribe({
       next: (data) => {
         this.successMessage = 'Workspace created successfully!';
+        this.isSubmitting = false;
         setTimeout(() => {
           this.router.navigate(['/workspaces', data.id]);
         }, 1500);
-        this.isSubmitting = false;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Failed to create workspace';
         console.error('Error creating workspace:', error);
+        this.isSubmitting = false;
       }
     });
-    this.isSubmitting = false;
-
   }
 
   updateWorkspace(): void {

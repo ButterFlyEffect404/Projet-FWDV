@@ -24,12 +24,17 @@ export class CreateTaskDto {
     @Type(() => User) // Ensures the plain object is transformed into a User instance
     assignedTo?: User;
 
+    
+    @IsNotEmpty()
+    workspaceId: number;
+
+
     // Usually, createdBy is handled by the Request user in the Controller, 
     // but if you're passing an ID or object:
-    @IsNotEmpty()
+    @IsOptional()
     @ValidateNested()
     @Type(() => User)
-    createdBy: User;
+    createdBy?: User;
 
     @IsNotEmpty()
     @IsDate() 
