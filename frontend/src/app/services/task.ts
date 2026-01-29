@@ -18,7 +18,7 @@ export interface CreateTaskDto {
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   dueDate: string;
-  workspaceId: string;
+  workspaceId: number;
   assignedToId?: number;
 }
 
@@ -41,7 +41,7 @@ export class TaskService {
    * @returns Observable with array of tasks
    */
   getAll(filters?: {
-    workspaceId?: string;
+    workspaceId?: number;
     status?: string;
     priority?: string;
     assignedToId?: number;
@@ -49,7 +49,7 @@ export class TaskService {
     let params = new HttpParams();
     
     if (filters) {
-      if (filters.workspaceId) params = params.set('workspaceId', filters.workspaceId);
+      if (filters.workspaceId) params = params.set('workspaceId', filters.workspaceId.toString());
       if (filters.status) params = params.set('status', filters.status);
       if (filters.priority) params = params.set('priority', filters.priority);
       if (filters.assignedToId) params = params.set('assignedToId', filters.assignedToId.toString());
@@ -70,7 +70,7 @@ export class TaskService {
    * @param id - Task ID
    * @returns Observable with task data
    */
-  getById(id: number): Observable<Task> {
+  getById(id: number | string): Observable<Task> {
     return this.http.get<Task>(`${this.apiUrl}/${id}`, {
       withCredentials: true
     });

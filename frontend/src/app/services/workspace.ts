@@ -19,7 +19,7 @@ export class WorkspaceService {
     });
   }
 
-  getById(id: string): Observable<Workspace> {
+  getById(id: number | string): Observable<Workspace> {
     return this.http.get<Workspace>(`${this.apiUrl}/${id}`, {
       withCredentials: true
     });
@@ -31,31 +31,31 @@ export class WorkspaceService {
     });
   }
 
-  update(id: string, workspace: Partial<Workspace>): Observable<any> {
+  update(id: number | string, workspace: Partial<Workspace>): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, workspace, {
       withCredentials: true
     });
   }
 
-  delete(id: string): Observable<any> {
+  delete(id: number | string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, {
       withCredentials: true
     });
   }
 
-  addMember(workspaceId: string, userId: string): Observable<any> {
+  addMember(workspaceId: number | string, userId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${workspaceId}/members`, { userId : Number(userId) }, {
       withCredentials: true
     });
   }
 
-  removeMember(workspaceId: string, userId: string): Observable<any> {
+  removeMember(workspaceId: number | string, userId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${workspaceId}/members/${userId}`, {
       withCredentials: true
     });
   }
 
-  getWorkspaceTasks(workspaceId: string): Observable<Task[]> {
+  getWorkspaceTasks(workspaceId: number | string): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.apiUrl}/${workspaceId}/tasks`, {
       withCredentials: true
     });

@@ -1,5 +1,5 @@
 export interface Workspace {
-  id: string;
+  id: number;
   name: string;
   description: string;
   ownerId: string;

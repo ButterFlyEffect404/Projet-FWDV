@@ -60,7 +60,7 @@ export class WorkspaceList {
     }
   }
 
-  viewWorkspace(id: string): void {
+  viewWorkspace(id: number | string): void {
     this.router.navigate(['/workspaces', id]);
   }
 
@@ -68,7 +68,7 @@ export class WorkspaceList {
     this.router.navigate(['/workspaces/new']);
   }
 
-  deleteWorkspace(id: string): void {
+  deleteWorkspace(id: number | string): void {
     if (confirm('Are you sure you want to delete this workspace?')) {
       this.workspaceService.delete(id).subscribe({
         next: () => {

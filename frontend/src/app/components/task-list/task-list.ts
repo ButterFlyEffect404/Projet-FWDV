@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../services/task';
+import { UserService } from '../../services/user';
 import { Task } from '../../models/task.model';
+import { User } from '../../models/user.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FormatStatusPipe } from '../../pipes/format-status.pipe';
@@ -18,19 +20,23 @@ export class TaskList {
   returnUrl = '/tasks';
   tasks = signal<Task[]>([]);
   filteredTasks = signal<Task[]>([]);
+  users = signal<User[]>([]);
   filterStatus = signal<string>('ALL');
   filterPriority = signal<string>('ALL');
   searchQuery = signal<string>('');
   sortBy = signal<string>('dueDate');
+  showDoneTasks = signal<boolean>(false);
 
   constructor(
     private taskService: TaskService,
+    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
     private cdRef: ChangeDetectorRef
   ) {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tasks';
     this.loadTasks();
+    this.loadUsers();
   }
 
   loadTasks(): void {
@@ -50,8 +56,24 @@ export class TaskList {
 
   }
 
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (data: User[]) => {
+        this.users.set(data);
+      },
+      error: (error: any) => {
+        console.error('Error loading users:', error);
+      }
+    });
+  }
+
   applyFilters(): void {
     let filtered = [...this.tasks()];
+
+    // Hide done tasks if toggle is off
+    if (!this.showDoneTasks()) {
+      filtered = filtered.filter(t => t.status !== 'DONE');
+    }
 
     // Filter by status
     if (this.filterStatus() !== 'ALL') {
@@ -140,12 +162,30 @@ export class TaskList {
 
   deleteTask(taskId: number): void {
     if (confirm('Are you sure you want to delete this task?')) {
-      // TODO: Implement delete functionality
-      console.log('Delete task:', taskId);
+      this.taskService.delete(taskId).subscribe({
+        next: () => {
+          this.loadTasks();
+        },
+        error: (error) => {
+          console.error('Error deleting task:', error);
+          this.errorMessage = 'Failed to delete task';
+        }
+      });
     }
+  }
+
+  getUserName(userId: number | string): string {
+    if (!userId) return 'Unassigned';
+    const user = this.users().find(u => u.id.toString() === userId.toString());
+    return user ? `${user.firstName} ${user.lastName}` : 'Unknown';
   }
 
   addNewTask(): void {
     this.router.navigate(['/task', 'new']);
+  }
+
+  toggleDoneTasks(): void {
+    this.showDoneTasks.set(!this.showDoneTasks());
+    this.applyFilters();
   }
 }

@@ -63,7 +63,7 @@ export class WorkspaceDetail {
     }
   }
 
-  loadWorkspaceTasks(workspaceId: string): void {
+  loadWorkspaceTasks(workspaceId: number | string): void {
     this.isLoadingTasks = true;
     this.workspaceService.getWorkspaceTasks(workspaceId).subscribe({
       next: (data: Task[]) => {
