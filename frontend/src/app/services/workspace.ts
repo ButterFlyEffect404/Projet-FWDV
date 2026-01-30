@@ -89,8 +89,16 @@ export class WorkspaceService {
 
 
   getWorkspaceTasks(workspaceId: number | string): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/${workspaceId}/tasks`, {
+    return this.http.get<Task[] | { success?: boolean; data?: Task[] }>(`${this.apiUrl}/${workspaceId}/tasks`, {
       withCredentials: true,
-    });
+    }).pipe(
+      map((res) => {
+        if (Array.isArray(res)) return res;
+        if (res && typeof res === 'object' && 'data' in res && Array.isArray(res.data)) {
+          return res.data;
+        }
+        return [];
+      }),
+    );
   }
 }
