@@ -47,8 +47,8 @@ export class TaskDetail {
         this.isLoading = false;
         
         // Load related data
-        if (data.assignedTo) {
-          this.loadAssignedUser(data.assignedTo);
+        if (data.assignedTo?.id != null) {
+          this.loadAssignedUser(data.assignedTo.id);
         }
         if (data.workspaceId) {
           this.loadWorkspace(data.workspaceId);

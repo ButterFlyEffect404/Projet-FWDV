@@ -131,7 +131,7 @@
             <span class="meta-icon">👤</span>
             <div class="meta-content">
               <span class="meta-label">Assigned To</span>
-              <span class="meta-value">{{ getUserName(task.assignedTo) }}</span>
+              <span class="meta-value">{{ task.assignedTo ? getUserName(task.assignedTo.id) : 'Unassigned' }}</span>
             </div>
           </div>
         </div>
