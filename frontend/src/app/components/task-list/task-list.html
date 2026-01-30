@@ -33,6 +33,17 @@
 
     <div class="filters-row">
       <div class="filter-group">
+        <label class="toggle-label">
+          <input 
+            type="checkbox" 
+            [checked]="showDoneTasks()"
+            (click)="toggleDoneTasks()"
+            class="toggle-checkbox"
+          />
+          <span class="toggle-text">Show done tasks</span>
+        </label>
+      </div>
+      <div class="filter-group">
         <label>Status:</label>
         <select 
           [(ngModel)]="filterStatus" 
@@ -86,54 +97,71 @@
   <div *ngIf="!isLoading && filteredTasks().length > 0" class="tasks-grid">
     <div *ngFor="let task of filteredTasks()" class="task-card">
       <div class="card-header">
-        <h3 class="task-title">{{ task.title }}</h3>
-        <div class="card-actions">
-          <button 
-            class="action-btn view-btn" 
-            title="View"
-            (click)="viewTask(task.id)"
-          >
-            👁️
-          </button>
-          <button 
-            class="action-btn edit-btn" 
-            title="Edit"
-            (click)="editTask(task.id)"
-          >
-            ✏️
-          </button>
-          <button 
-            class="action-btn delete-btn" 
-            title="Delete"
-            (click)="deleteTask(task.id)"
-          >
-            🗑️
-          </button>
+        <div class="task-header-left">
+          <h3 class="task-title">{{ task.title }}</h3>
+          <div class="task-badges">
+            <span 
+              class="badge status-badge" 
+              [style.backgroundColor]="getStatusColor(task.status)"
+            >
+              {{ task.status | formatStatus }}
+            </span>
+            <span 
+              class="badge priority-badge" 
+              [style.backgroundColor]="getPriorityColor(task.priority)"
+            >
+              {{ task.priority }}
+            </span>
+          </div>
         </div>
       </div>
 
-      <p class="task-description">{{ task.description | slice:0:100 }}{{ task.description.length > 100 ? '...' : '' }}</p>
+      <p class="task-description">{{ task.description | slice:0:120 }}{{ task.description.length > 120 ? '...' : '' }}</p>
 
-      <div class="card-footer">
-        <div class="status-priority">
-          <span 
-            class="badge status-badge" 
-            [style.backgroundColor]="getStatusColor(task.status)"
-          >
-            {{ task.status | formatStatus }}
-          </span>
-          <span 
-            class="badge priority-badge" 
-            [style.backgroundColor]="getPriorityColor(task.priority)"
-          >
-            {{ task.priority }}
-          </span>
+      <div class="task-meta">
+        <div class="meta-row">
+          <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            <div class="meta-content">
+              <span class="meta-label">Due Date</span>
+              <span class="meta-value">{{ task.dueDate | date:'MMM d, yyyy' }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">👤</span>
+            <div class="meta-content">
+              <span class="meta-label">Assigned To</span>
+              <span class="meta-value">{{ getUserName(task.assignedTo) }}</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="due-date">
-          <span class="label">Due:</span>
-          <span class="date">{{ task.dueDate | date:'MMM d, yyyy' }}</span>
-        </div>
+      <div class="card-actions">
+        <button 
+          class="action-btn view-btn" 
+          title="View details"
+          (click)="viewTask(task.id)"
+        >
+          <span class="btn-icon">👁️</span>
+          <span class="btn-text">View</span>
+        </button>
+        <button 
+          class="action-btn edit-btn" 
+          title="Edit task"
+          (click)="editTask(task.id)"
+        >
+          <span class="btn-icon">✏️</span>
+          <span class="btn-text">Edit</span>
+        </button>
+        <button 
+          class="action-btn delete-btn" 
+          title="Delete task"
+          (click)="deleteTask(task.id)"
+        >
+          <span class="btn-icon">🗑️</span>
+          <span class="btn-text">Delete</span>
+        </button>
       </div>
     </div>
   </div>

@@ -19,6 +19,7 @@ export interface CreateTaskDto {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   dueDate: string;
   workspaceId: number;
+  workspaceId: number;
   assignedToId?: number;
 }
 
@@ -76,7 +77,7 @@ export class TaskService {
    * @param id - Task ID
    * @returns Observable with task data
    */
-  getById(id: number): Observable<Task> {
+  getById(id: number | string): Observable<Task> {
     return this.http.get<Task>(`${this.apiUrl}/${id}`, {
       withCredentials: true
     });

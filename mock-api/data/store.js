@@ -1,5 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
-
 // In-memory data store
 let users = [
   {
@@ -30,7 +28,7 @@ let users = [
 
 let workspaces = [
   {
-    id: uuidv4(),
+    id: 1,
     name: 'Default Workspace',
     description: 'My default workspace',
     ownerId: users[0].id.toString(),
@@ -39,7 +37,7 @@ let workspaces = [
     updatedAt: new Date()
   },
   {
-    id: uuidv4(),
+    id: 2,
     name: 'Project Alpha',
     description: 'A workspace for Project Alpha',
     ownerId: users[1].id.toString(),
@@ -51,7 +49,7 @@ let workspaces = [
 
 let tasks = [
   {
-    id: uuidv4(),
+    id: 1,
     title: 'Setup project structure',
     description: 'Create initial project folders and files',
     status: 'DONE',
@@ -64,7 +62,7 @@ let tasks = [
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
   },
   {
-    id: uuidv4(),
+    id: 2,
     title: 'Implement authentication',
     description: 'Add JWT-based authentication',
     status: 'IN_PROGRESS',
@@ -77,7 +75,7 @@ let tasks = [
     updatedAt: new Date()
   },
   {
-    id: uuidv4(),
+    id: 3,
     title: 'Design UI mockups',
     description: 'Create UI mockups for the application',
     status: 'TODO',
@@ -91,8 +89,14 @@ let tasks = [
   }
 ];
 
+// Counter for generating new IDs
+let nextWorkspaceId = 3;
+let nextTaskId = 4;
+
 module.exports = {
   users,
   workspaces,
-  tasks
+  tasks,
+  getNextWorkspaceId: () => ++nextWorkspaceId,
+  getNextTaskId: () => ++nextTaskId
 };

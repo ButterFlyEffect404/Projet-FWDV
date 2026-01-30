@@ -74,6 +74,7 @@ export class WorkspaceService {
   }
 
   getWorkspaceTasks(workspaceId: number | string): Observable<Task[]> {
+  getWorkspaceTasks(workspaceId: number | string): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.apiUrl}/${workspaceId}/tasks`, {
       withCredentials: true,
     });
