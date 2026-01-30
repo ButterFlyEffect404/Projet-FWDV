@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TaskModule } from './task/task.module';
 import { AuthModule } from './auth/auth.module';
+import { WorkspaceModule } from './workspace/workspace.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Task } from './task/entities/task.entity';
@@ -25,10 +26,12 @@ import { LoggerMiddleware } from './common/middleware/logger/logger.middleware';
       database: process.env.DB_NAME,
       entities: [Task, User],
       synchronize: true, 
+        autoLoadEntities: true,
     }),
     UserModule, 
     AuthModule,
     TaskModule,
+    WorkspaceModule,
     SeedModule,
   ],
   controllers: [AppController],
