@@ -8,8 +8,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Task } from './task/entities/task.entity';
 import { User } from './user/entities/user.entity';
+import { Workspace } from './workspace/entities/workspace.entity';
 import { SeedModule } from './seed/seed.module';
 import { LoggerMiddleware } from './common/middleware/logger/logger.middleware';
+import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [ 
@@ -23,12 +25,13 @@ import { LoggerMiddleware } from './common/middleware/logger/logger.middleware';
       username: process.env.DB_USER, 
       password: process.env.DB_PASSWORD, 
       database: process.env.DB_NAME,
-      entities: [Task, User],
+      entities: [Task, User, Workspace],
       synchronize: true, 
     }),
     UserModule, 
     AuthModule,
     TaskModule,
+    WorkspaceModule,
     SeedModule,
   ],
   controllers: [AppController],
