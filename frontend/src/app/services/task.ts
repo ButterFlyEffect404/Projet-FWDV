@@ -19,7 +19,6 @@ export interface CreateTaskDto {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   dueDate: string;
   workspaceId: number;
-  workspaceId: number;
   assignedToId?: number;
 }
 

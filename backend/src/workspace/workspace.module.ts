@@ -4,9 +4,10 @@ import { WorkspaceService } from './workspace.service';
 import { WorkspaceController } from './workspace.controller';
 import { Workspace } from './entities/workspace.entity';
 import { User } from '../user/entities/user.entity';
+import { Task } from 'src/task/entities/task.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Workspace, User])],
+  imports: [TypeOrmModule.forFeature([Workspace, User , Task])],
   controllers: [WorkspaceController],
   providers: [WorkspaceService],
   exports: [WorkspaceService],
