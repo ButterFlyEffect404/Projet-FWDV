@@ -129,11 +129,16 @@ export class WorkspaceForm {
     };
 
     this.workspaceService.create(newWorkspace).subscribe({
-      next: (data) => {
+      next: (data: Workspace) => {
         this.successMessage = 'Workspace created successfully!';
         this.isSubmitting = false;
+        const id = data?.id;
         setTimeout(() => {
-          this.router.navigate(['/workspaces', data.id]);
+          if (id != null) {
+            this.router.navigate(['/workspaces', id]);
+          } else {
+            this.router.navigate(['/workspaces']);
+          }
         }, 1500);
       },
       error: (error) => {

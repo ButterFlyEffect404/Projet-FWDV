@@ -44,9 +44,13 @@ export class WorkspaceService {
   }
 
   create(workspace: { name: string; description?: string; members?: number[] }): Observable<Workspace> {
-    return this.http.post<Workspace>(`${this.apiUrl}`, workspace, {
-      withCredentials: true,
-    });
+    return this.http
+      .post<Workspace | { success?: boolean; data?: Workspace }>(`${this.apiUrl}`, workspace, {
+        withCredentials: true,
+      })
+      .pipe(
+        map((res) => (res && typeof res === 'object' && 'data' in res && res.data) ? res.data : res as Workspace),
+      );
   }
 
   update(id: number | string, workspace: Partial<Pick<Workspace, 'name' | 'description' | 'members'>>): Observable<Workspace> {
