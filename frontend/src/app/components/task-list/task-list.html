@@ -15,13 +15,13 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="isLoading()" class="loading-container">
     <div class="spinner"></div>
     <p>Loading tasks...</p>
   </div>
 
   <!-- Filters and Search -->
-  <div *ngIf="!isLoading" class="filters-section">
+  <div *ngIf="!isLoading()" class="filters-section">
     <div class="search-bar">
       <input 
         type="text" 
@@ -87,14 +87,14 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!isLoading && filteredTasks().length === 0" class="empty-state">
+  <div *ngIf="!isLoading() && filteredTasks().length === 0" class="empty-state">
     <div class="empty-icon">📋</div>
     <h2>No tasks found</h2>
     <p>{{ searchQuery() ? 'Try adjusting your search filters' : 'Create a new task to get started' }}</p>
   </div>
 
   <!-- Tasks Grid -->
-  <div *ngIf="!isLoading && filteredTasks().length > 0" class="tasks-grid">
+  <div *ngIf="!isLoading() && filteredTasks().length > 0" class="tasks-grid">
     <div *ngFor="let task of filteredTasks()" class="task-card">
       <div class="card-header">
         <div class="task-header-left">
@@ -116,7 +116,7 @@
         </div>
       </div>
 
-      <p class="task-description">{{ task.description | slice:0:120 }}{{ task.description.length > 120 ? '...' : '' }}</p>
+      <p class="task-description">{{ (task.description || '') | slice:0:120 }}{{ (task.description || '').length > 120 ? '...' : '' }}</p>
 
       <div class="task-meta">
         <div class="meta-row">
@@ -167,7 +167,7 @@
   </div>
 
   <!-- Results Counter -->
-  <div *ngIf="!isLoading && tasks().length > 0" class="results-counter">
+  <div *ngIf="!isLoading() && tasks().length > 0" class="results-counter">
     Showing {{ filteredTasks().length }} of {{ tasks().length }} tasks
   </div>
 </div>

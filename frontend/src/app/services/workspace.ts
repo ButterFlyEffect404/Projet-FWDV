@@ -27,6 +27,7 @@ export class WorkspaceService {
       })
       .pipe(
         map((res) => {
+          if (Array.isArray(res)) return res;
           const d = res?.data;
           if (Array.isArray(d)) return d;
           if (d && typeof d === 'object' && 'data' in d && Array.isArray((d as WorkspaceListResponse).data)) {

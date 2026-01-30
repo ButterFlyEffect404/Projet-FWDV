@@ -18,13 +18,13 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="isLoading()" class="loading-container">
     <div class="spinner"></div>
     <p>Loading workspaces...</p>
   </div>
 
   <!-- Search Bar -->
-  <div *ngIf="!isLoading" class="search-section">
+  <div *ngIf="!isLoading()" class="search-section">
     <div class="search-bar">
       <input 
         type="text" 
@@ -37,7 +37,7 @@
   </div>
 
   <!-- Workspaces Grid -->
-  <div *ngIf="!isLoading" class="workspaces-section">
+  <div *ngIf="!isLoading()" class="workspaces-section">
     <div *ngIf="filteredWorkspaces().length === 0" class="empty-state">
       <div class="empty-icon">📭</div>
       <h2>No workspaces found</h2>
@@ -63,7 +63,7 @@
         <div class="workspace-meta">
           <div class="meta-item">
             <span class="meta-label">Members</span>
-            <span class="meta-value">{{ workspace.members.length }}</span>
+            <span class="meta-value">{{ (workspace.members ?? []).length }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Created</span>

@@ -16,7 +16,7 @@ import { FormatStatusPipe } from '../../pipes/format-status.pipe';
 })
 export class TaskList {
   errorMessage = '';
-  isLoading = false;
+  isLoading = signal(false);
   returnUrl = '/tasks';
   tasks = signal<Task[]>([]);
   filteredTasks = signal<Task[]>([]);
@@ -40,20 +40,24 @@ export class TaskList {
   }
 
   loadTasks(): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
+    this.errorMessage = '';
     this.taskService.getAll().subscribe({
       next: (data: unknown) => {
-        const list = Array.isArray(data) ? data : [];
-        this.tasks.set(list);
-        this.applyFilters();
-        this.isLoading = false;
+        try {
+          const list = Array.isArray(data) ? data : (data as { data?: unknown[] })?.data ?? [];
+          this.tasks.set(Array.isArray(list) ? list : []);
+          this.applyFilters();
+        } finally {
+          this.isLoading.set(false);
+        }
       },
       error: (error: unknown) => {
         this.errorMessage = 'Failed to load tasks';
         console.error('Error loading tasks:', error);
         this.tasks.set([]);
         this.applyFilters();
-        this.isLoading = false;
+        this.isLoading.set(false);
       },
     });
   }
@@ -92,22 +96,24 @@ export class TaskList {
     // Search by title and description
     if (this.searchQuery()) {
       const query = this.searchQuery().toLowerCase();
-      filtered = filtered.filter(t => 
-        t.title.toLowerCase().includes(query) || 
-        t.description.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter((t) => {
+        const title = (t.title ?? '').toLowerCase();
+        const desc = (t.description ?? '').toLowerCase();
+        return title.includes(query) || desc.includes(query);
+      });
     }
 
     // Sort
     filtered.sort((a, b) => {
       switch (this.sortBy()) {
         case 'dueDate':
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        case 'priority':
-          const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-          return priorityOrder[a.priority] - priorityOrder[b.priority];
+          return new Date(a.dueDate ?? 0).getTime() - new Date(b.dueDate ?? 0).getTime();
+        case 'priority': {
+          const priorityOrder: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+          return (priorityOrder[a.priority] ?? 1) - (priorityOrder[b.priority] ?? 1);
+        }
         case 'title':
-          return a.title.localeCompare(b.title);
+          return (a.title ?? '').localeCompare(b.title ?? '');
         default:
           return 0;
       }

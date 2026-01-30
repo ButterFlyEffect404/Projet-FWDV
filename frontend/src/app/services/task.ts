@@ -8,7 +8,7 @@
  */
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { Task } from '../models/task.model';
 import { environment } from '../../environments/environment';
 
@@ -64,9 +64,16 @@ export class TaskService {
       if (filters.priority) params = params.set('priority', filters.priority);
       if (filters.assignedToId != null) params = params.set('assignedToId', String(filters.assignedToId));
     }
-    return this.http.get<Task[]>(this.apiUrl, { params, withCredentials: true }).pipe(
-      tap((tasks) => this.tasks.set(tasks)),
-    );
+    return this.http
+      .get<Task[] | { success?: boolean; data?: Task[] }>(this.apiUrl, { params, withCredentials: true })
+      .pipe(
+        map((res) => {
+          if (Array.isArray(res)) return res;
+          if (res?.data && Array.isArray(res.data)) return res.data;
+          return [];
+        }),
+        tap((tasks) => this.tasks.set(tasks)),
+      );
   }
 
   /**

@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class WorkspaceList {
   errorMessage = '';
-  isLoading = false;
+  isLoading = signal(false);
   workspaces = signal<Workspace[]>([]);
   filteredWorkspaces = signal<Workspace[]>([]);
   searchQuery = signal<string>('');
@@ -27,17 +27,24 @@ export class WorkspaceList {
   }
 
   loadWorkspaces(): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
+    this.errorMessage = '';
     this.workspaceService.getAll().subscribe({
-      next: (data) => {
-        this.workspaces.set(data ?? []);
-        this.applySearch();
-        this.isLoading = false;
+      next: (data: unknown) => {
+        try {
+          const list = Array.isArray(data) ? data : (data as { data?: unknown[] })?.data ?? [];
+          this.workspaces.set(Array.isArray(list) ? list : []);
+          this.applySearch();
+        } finally {
+          this.isLoading.set(false);
+        }
       },
-      error: (error) => {
+      error: (error: unknown) => {
         this.errorMessage = 'Failed to load workspaces';
         console.error('Error loading workspaces:', error);
-        this.isLoading = false;
+        this.workspaces.set([]);
+        this.applySearch();
+        this.isLoading.set(false);
       },
     });
   }
