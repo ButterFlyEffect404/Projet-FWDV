@@ -27,7 +27,7 @@ export class TaskForm implements OnInit {
   // Dropdown data
   workspaces = signal<Workspace[]>([]);
   users = signal<User[]>([]);
-  preselectedWorkspaceId: string | null = null;
+  preselectedWorkspaceId: number | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -48,8 +48,8 @@ export class TaskForm implements OnInit {
     // Check for preselected workspace from query params
     this.route.queryParams.subscribe(params => {
       if (params['workspaceId']) {
-        this.preselectedWorkspaceId = params['workspaceId'];
-        this.taskForm.patchValue({ workspaceId: params['workspaceId'] });
+        this.preselectedWorkspaceId = parseInt(params['workspaceId'], 10);
+        this.taskForm.patchValue({ workspaceId: parseInt(params['workspaceId'], 10) });
       }
     });
     
@@ -140,7 +140,7 @@ export class TaskForm implements OnInit {
       status: formData.status,
       priority: formData.priority,
       dueDate: formData.dueDate,
-      workspaceId: formData.workspaceId,
+      workspaceId: parseInt(formData.workspaceId, 10),
       assignedToId: formData.assignedToId ? parseInt(formData.assignedToId, 10) : undefined,
       createdBy: 3 ,
     };

@@ -1,7 +1,6 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
 const router = express.Router();
-const { tasks, workspaces, users } = require('../data/store');
+const { tasks, workspaces, users, getNextTaskId } = require('../data/store');
 
 // GET all tasks
 router.get('/', (req, res) => {
@@ -24,7 +23,7 @@ router.get('/', (req, res) => {
 
 // GET task by ID
 router.get('/:id', (req, res) => {
-  const task = tasks.find(t => t.id === req.params.id);
+  const task = tasks.find(t => t.id === parseInt(req.params.id, 10));
   if (!task) {
     return res.status(404).json({
       message: 'Task not found'
@@ -71,7 +70,7 @@ router.post('/', (req, res) => {
   }
 
   const newTask = {
-    id: uuidv4(),
+    id: getNextTaskId(),
     title,
     description: description || '',
     status: status || 'pending',
@@ -91,7 +90,7 @@ router.post('/', (req, res) => {
 
 // UPDATE task
 router.put('/:id', (req, res) => {
-  const task = tasks.find(t => t.id === req.params.id);
+  const task = tasks.find(t => t.id === parseInt(req.params.id, 10));
 
   if (!task) {
     return res.status(404).json({
@@ -122,7 +121,7 @@ router.put('/:id', (req, res) => {
 
 // DELETE task
 router.delete('/:id', (req, res) => {
-  const index = tasks.findIndex(t => t.id === req.params.id);
+  const index = tasks.findIndex(t => t.id === parseInt(req.params.id, 10));
 
   if (index === -1) {
     return res.status(404).json({

@@ -5,7 +5,7 @@ export interface Task {
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   dueDate: Date;
-  workspaceId: string;
+  workspaceId: number;
   createdAt: Date;
   updatedAt: Date;
   assignedTo?: any;

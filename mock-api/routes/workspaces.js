@@ -1,7 +1,6 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
 const router = express.Router();
-const { workspaces, users, tasks } = require('../data/store');
+const { workspaces, users, tasks, getNextWorkspaceId } = require('../data/store');
 
 // GET all workspaces
 router.get('/', (req, res) => {
@@ -10,7 +9,7 @@ router.get('/', (req, res) => {
 
 // GET workspace by ID
 router.get('/:id', (req, res) => {
-  const workspace = workspaces.find(w => w.id === req.params.id);
+  const workspace = workspaces.find(w => w.id === parseInt(req.params.id, 10));
   if (!workspace) {
     return res.status(404).json({
       message: 'Workspace not found'
@@ -39,7 +38,7 @@ router.post('/', (req, res) => {
   }
 
   const newWorkspace = {
-    id: uuidv4(),
+    id: getNextWorkspaceId(),
     name,
     description: description || '',
     ownerId,
@@ -55,7 +54,7 @@ router.post('/', (req, res) => {
 
 // UPDATE workspace
 router.put('/:id', (req, res) => {
-  const workspace = workspaces.find(w => w.id === req.params.id);
+  const workspace = workspaces.find(w => w.id === parseInt(req.params.id, 10));
 
   if (!workspace) {
     return res.status(404).json({
@@ -75,7 +74,7 @@ router.put('/:id', (req, res) => {
 
 // DELETE workspace
 router.delete('/:id', (req, res) => {
-  const index = workspaces.findIndex(w => w.id === req.params.id);
+  const index = workspaces.findIndex(w => w.id === parseInt(req.params.id, 10));
 
   if (index === -1) {
     return res.status(404).json({
@@ -90,7 +89,7 @@ router.delete('/:id', (req, res) => {
 
 // ADD member to workspace
 router.post('/:id/members', (req, res) => {
-  const workspace = workspaces.find(w => w.id === req.params.id);
+  const workspace = workspaces.find(w => w.id === parseInt(req.params.id, 10));
 
   if (!workspace) {
     return res.status(404).json({
@@ -127,7 +126,7 @@ router.post('/:id/members', (req, res) => {
 
 // REMOVE member from workspace
 router.delete('/:id/members/:userId', (req, res) => {
-  const workspace = workspaces.find(w => w.id === req.params.id);
+  const workspace = workspaces.find(w => w.id === parseInt(req.params.id, 10));
 
   if (!workspace) {
     return res.status(404).json({
@@ -151,7 +150,8 @@ router.delete('/:id/members/:userId', (req, res) => {
 
 // GET tasks for a specific workspace
 router.get('/:id/tasks', (req, res) => {
-  const workspace = workspaces.find(w => w.id === req.params.id);
+  const workspaceId = parseInt(req.params.id, 10);
+  const workspace = workspaces.find(w => w.id === workspaceId);
 
   if (!workspace) {
     return res.status(404).json({
@@ -160,7 +160,7 @@ router.get('/:id/tasks', (req, res) => {
   }
 
   // Filter tasks by workspaceId
-  const workspaceTasks = tasks.filter(t => t.workspaceId === req.params.id);
+  const workspaceTasks = tasks.filter(t => t.workspaceId === workspaceId);
 
   res.json(workspaceTasks);
 });

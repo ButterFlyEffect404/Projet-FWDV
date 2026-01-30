@@ -9,24 +9,72 @@
     
     <nav class="nav">
       @if (isAuthenticated()) {
-        <a routerLink="/tasks" routerLinkActive="active" class="nav-link">
-          Tasks
-        </a>
+        <!-- Navigation Links -->
+        <div class="nav-links">
+          <a routerLink="/tasks" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">✓</span>
+            Tasks
+          </a>
+          <a routerLink="/workspaces" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">💼</span>
+            Workspaces
+          </a>
+        </div>
         
+        <!-- User Menu -->
         <div class="user-menu">
-          <span class="user-name">{{ userDisplayName() }}</span>
-          <button class="btn-logout" (click)="onLogout()">
-            Logout
+          <button class="user-button" (click)="toggleUserDropdown()">
+            <div class="user-avatar">
+              {{ userInitials() }}
+            </div>
+            <span class="user-name-text">{{ userDisplayName() }}</span>
+            <span class="dropdown-arrow" [class.open]="showUserDropdown()">▼</span>
           </button>
+          
+          <!-- Dropdown Menu -->
+          <div class="dropdown-menu" [class.show]="showUserDropdown()" (click)="closeDropdown()">
+            <div class="dropdown-header">
+              <div class="dropdown-avatar">{{ userInitials() }}</div>
+              <div class="dropdown-user-info">
+                <div class="dropdown-user-name">{{ userDisplayName() }}</div>
+                <div class="dropdown-user-email">{{ currentUser()?.email }}</div>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a routerLink="/profile" class="dropdown-item">
+              <span class="dropdown-icon">👤</span>
+              Profile
+            </a>
+            <a routerLink="/workspaces" class="dropdown-item">
+              <span class="dropdown-icon">💼</span>
+              My Workspaces
+            </a>
+            <a routerLink="/tasks" class="dropdown-item">
+              <span class="dropdown-icon">✓</span>
+              My Tasks
+            </a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item logout" (click)="onLogout()">
+              <span class="dropdown-icon">🚪</span>
+              Logout
+            </button>
+          </div>
         </div>
       } @else {
-        <a routerLink="/login" routerLinkActive="active" class="nav-link">
-          Login
-        </a>
-        <a routerLink="/register" routerLinkActive="active" class="nav-link">
-          Register
-        </a>
+        <div class="auth-links">
+          <a routerLink="/login" routerLinkActive="active" class="nav-link login">
+            Login
+          </a>
+          <a routerLink="/register" routerLinkActive="active" class="nav-link register">
+            Get Started
+          </a>
+        </div>
       }
     </nav>
   </div>
+  
+  <!-- Dropdown Backdrop -->
+  @if (showUserDropdown()) {
+    <div class="dropdown-backdrop" (click)="closeDropdown()"></div>
+  }
 </header>

@@ -1,0 +1,199 @@
+<div class="task-detail-container">
+  <!-- Floating Action Menu -->
+  <div class="floating-menu">
+    <button class="fab-btn back-btn" (click)="goBack()" title="Back to tasks">
+      <span class="fab-icon">←</span>
+    </button>
+    <button class="fab-btn edit-btn" (click)="editTask()" title="Edit task">
+      <span class="fab-icon">✏️</span>
+    </button>
+    <button class="fab-btn delete-btn" (click)="deleteTask()" title="Delete task">
+      <span class="fab-icon">🗑️</span>
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <span class="alert-icon">⚠️</span>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loader">
+      <div class="loader-circle"></div>
+      <div class="loader-circle"></div>
+      <div class="loader-circle"></div>
+    </div>
+    <p class="loading-text">Loading task details...</p>
+  </div>
+
+  <!-- Task Detail -->
+  <div *ngIf="!isLoading && task()" class="detail-content">
+    
+    <!-- Hero Header with Gradient Background -->
+    <div class="hero-header">
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <div class="task-number">#{{ task()!.id }}</div>
+        <h1 class="hero-title">{{ task()!.title }}</h1>
+        <div class="hero-badges">
+          <div class="status-badge-large" [ngClass]="getStatusBadgeClass(task()!.status)">
+            <span class="badge-icon">●</span>
+            <span class="badge-text">{{ task()!.status.replace('_', ' ') }}</span>
+          </div>
+          <div class="priority-badge-large" [ngClass]="getPriorityBadgeClass(task()!.priority)">
+            <span class="badge-icon">🔥</span>
+            <span class="badge-text">{{ task()!.priority }} Priority</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      
+      <!-- Left Column -->
+      <div class="left-column">
+        
+        <!-- Description Card with Modern Design -->
+        <div class="glass-card description-card">
+          <div class="card-header-modern">
+            <div class="card-icon">📝</div>
+            <h2 class="card-title">Description</h2>
+          </div>
+          <div class="card-body">
+            <p class="description-text">{{ task()!.description || 'No description provided' }}</p>
+          </div>
+        </div>
+
+        <!-- Timeline Card -->
+        <div class="glass-card timeline-card">
+          <div class="card-header-modern">
+            <div class="card-icon">🕐</div>
+            <h2 class="card-title">Timeline</h2>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot created"></div>
+                <div class="timeline-content">
+                  <div class="timeline-label">Created</div>
+                  <div class="timeline-date">{{ task()!.createdAt | date: 'MMM d, y • h:mm a' }}</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot due" [class.overdue]="isDueDatePast()"></div>
+                <div class="timeline-content">
+                  <div class="timeline-label">Due Date</div>
+                  <div class="timeline-date" [class.text-danger]="isDueDatePast()">
+                    {{ task()!.dueDate | date: 'MMM d, y • h:mm a' }}
+                    <span *ngIf="isDueDatePast()" class="overdue-badge">Overdue</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot updated"></div>
+                <div class="timeline-content">
+                  <div class="timeline-label">Last Updated</div>
+                  <div class="timeline-date">{{ task()!.updatedAt | date: 'MMM d, y • h:mm a' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+        
+        <!-- Assignment Card with Avatar -->
+        <div class="glass-card assignment-card">
+          <div class="card-header-modern">
+            <div class="card-icon">👤</div>
+            <h2 class="card-title">Assigned To</h2>
+          </div>
+          <div class="card-body">
+            <div *ngIf="assignedUser()" class="user-profile">
+              <div class="user-avatar-large">
+                <div class="avatar-inner">
+                  {{ assignedUser()!.firstName.charAt(0) }}{{ assignedUser()!.lastName.charAt(0) }}
+                </div>
+                <div class="avatar-status online"></div>
+              </div>
+              <div class="user-details">
+                <h3 class="user-name">{{ assignedUser()!.firstName }} {{ assignedUser()!.lastName }}</h3>
+                <p class="user-email">
+                  <span class="email-icon">📧</span>
+                  {{ assignedUser()!.email }}
+                </p>
+              </div>
+            </div>
+            <div *ngIf="!assignedUser()" class="empty-state-small">
+              <div class="empty-icon">👥</div>
+              <p class="empty-text">Not assigned to anyone yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workspace Card with Link -->
+        <div class="glass-card workspace-card">
+          <div class="card-header-modern">
+            <div class="card-icon">💼</div>
+            <h2 class="card-title">Workspace</h2>
+          </div>
+          <div class="card-body">
+            <div *ngIf="workspace()" class="workspace-profile">
+              <div class="workspace-banner"></div>
+              <div class="workspace-details">
+                <h3 class="workspace-name">{{ workspace()!.name }}</h3>
+                <p class="workspace-desc">{{ workspace()!.description }}</p>
+                <a [routerLink]="['/workspaces', workspace()!.id]" class="view-workspace-btn">
+                  <span>View Workspace</span>
+                  <span class="arrow">→</span>
+                </a>
+              </div>
+            </div>
+            <div *ngIf="!workspace()" class="empty-state-small">
+              <div class="empty-icon">📁</div>
+              <p class="empty-text">No workspace assigned</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="glass-card stats-card">
+          <div class="card-header-modern">
+            <div class="card-icon">📊</div>
+            <h2 class="card-title">Quick Stats</h2>
+          </div>
+          <div class="card-body">
+            <div class="stat-item">
+              <div class="stat-label">Days until due</div>
+              <div class="stat-value" [class.text-danger]="getDaysUntilDue() < 0">
+                {{ getDaysUntilDue() }} {{ getDaysUntilDue() === 1 || getDaysUntilDue() === -1 ? 'day' : 'days' }}
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Task Age</div>
+              <div class="stat-value">{{ getTaskAge() }} {{ getTaskAge() === 1 ? 'day' : 'days' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !task()" class="empty-state-full">
+    <div class="empty-animation">
+      <div class="empty-circle"></div>
+      <div class="empty-icon-large">📋</div>
+    </div>
+    <h2 class="empty-title">Task Not Found</h2>
+    <p class="empty-subtitle">The task you're looking for doesn't exist or has been deleted.</p>
+    <button class="btn-back-home" (click)="goBack()">
+      <span>← Go Back to Tasks</span>
+    </button>
+  </div>
+</div>
