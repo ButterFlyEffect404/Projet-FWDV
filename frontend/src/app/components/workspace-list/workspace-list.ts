@@ -30,16 +30,16 @@ export class WorkspaceList {
     this.isLoading = true;
     this.workspaceService.getAll().subscribe({
       next: (data) => {
-        this.workspaces.set(data || []);
+        this.workspaces.set(data ?? []);
         this.applySearch();
-        
+        this.isLoading = false;
       },
       error: (error) => {
         this.errorMessage = 'Failed to load workspaces';
         console.error('Error loading workspaces:', error);
-      }
+        this.isLoading = false;
+      },
     });
-    this.isLoading = false;
   }
 
   onSearchChange(query: string): void {
@@ -52,15 +52,16 @@ export class WorkspaceList {
     if (!query) {
       this.filteredWorkspaces.set(this.workspaces());
     } else {
-      const filtered = this.workspaces().filter(w =>
-        w.name.toLowerCase().includes(query) ||
-        w.description.toLowerCase().includes(query)
+      const filtered = this.workspaces().filter(
+        (w) =>
+          w.name.toLowerCase().includes(query) ||
+          (w.description ?? '').toLowerCase().includes(query),
       );
       this.filteredWorkspaces.set(filtered);
     }
   }
 
-  viewWorkspace(id: string): void {
+  viewWorkspace(id: number | string): void {
     this.router.navigate(['/workspaces', id]);
   }
 
@@ -68,7 +69,7 @@ export class WorkspaceList {
     this.router.navigate(['/workspaces/new']);
   }
 
-  deleteWorkspace(id: string): void {
+  deleteWorkspace(id: number | string): void {
     if (confirm('Are you sure you want to delete this workspace?')) {
       this.workspaceService.delete(id).subscribe({
         next: () => {

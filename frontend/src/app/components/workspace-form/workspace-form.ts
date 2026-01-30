@@ -23,10 +23,14 @@ export class WorkspaceForm {
   workspace = signal<Workspace | null>(null);
   availableMembers = signal<User[]>([]);
   
-  formData = signal({
+  formData = signal<{
+    name: string;
+    description: string;
+    members: number[];
+  }>({
     name: '',
     description: '',
-    members: [] as string[]
+    members: [],
   });
 
   constructor(
@@ -72,8 +76,8 @@ export class WorkspaceForm {
         this.workspace.set(data);
         this.formData.set({
           name: data.name,
-          description: data.description,
-          members: data.members || []
+          description: data.description ?? '',
+          members: data.members ?? [],
         });
         this.isLoading = false;
       },
@@ -120,9 +124,8 @@ export class WorkspaceForm {
 
     const newWorkspace = {
       name: this.formData().name,
-      description: this.formData().description,
+      description: this.formData().description || undefined,
       members: this.formData().members,
-      ownerId: currentUser.id.toString()
     };
 
     this.workspaceService.create(newWorkspace).subscribe({
@@ -145,7 +148,8 @@ export class WorkspaceForm {
     const ws = this.workspace();
     if (!ws) return;
 
-    this.workspaceService.update(ws.id, this.formData()).subscribe({
+    const { name, description, members } = this.formData();
+    this.workspaceService.update(ws.id, { name, description, members }).subscribe({
       next: (data) => {
         this.successMessage = 'Workspace updated successfully!';
         setTimeout(() => {
@@ -169,29 +173,28 @@ export class WorkspaceForm {
     }
   }
 
-  onFormDataChange(field: string, value: string | string[]): void {
+  onFormDataChange(field: string, value: string | number[]): void {
     const current = this.formData();
     this.formData.set({
       ...current,
-      [field]: value
+      [field]: value,
     });
   }
 
-  toggleMember(memberId: string): void {
+  toggleMember(memberId: number): void {
     const current = this.formData().members;
     const updated = current.includes(memberId)
-      ? current.filter(id => id !== memberId)
+      ? current.filter((id) => id !== memberId)
       : [...current, memberId];
-    
     this.onFormDataChange('members', updated);
   }
 
-  isMemberSelected(memberId: string): boolean {
+  isMemberSelected(memberId: number): boolean {
     return this.formData().members.includes(memberId);
   }
 
-  getMemberName(memberId: string): string {
-    const member = this.availableMembers().find(m => m.id === parseInt(memberId, 10));
-    return member ? `${member.firstName} ${member.lastName}` : memberId;
+  getMemberName(memberId: number): string {
+    const member = this.availableMembers().find((m) => m.id === memberId);
+    return member ? `${member.firstName} ${member.lastName}` : String(memberId);
   }
 }

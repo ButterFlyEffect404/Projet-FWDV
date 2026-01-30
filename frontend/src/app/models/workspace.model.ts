@@ -1,9 +1,9 @@
 export interface Workspace {
-  id: string;
+  id: number;
   name: string;
-  description: string;
-  ownerId: string;
-  members: string[];
+  description: string | null;
+  ownerId: number;
+  members: number[];
   createdAt: Date;
   updatedAt: Date;
 }

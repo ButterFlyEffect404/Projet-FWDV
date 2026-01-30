@@ -36,22 +36,26 @@ export class TaskList {
   loadTasks(): void {
     this.isLoading = true;
     this.taskService.getAll().subscribe({
-      next: (data: Task[]) => {
-        this.tasks.set(data || []);
+      next: (data: unknown) => {
+        const list = Array.isArray(data) ? data : [];
+        this.tasks.set(list);
         this.applyFilters();
         this.isLoading = false;
       },
-      error: (error: any) => {
+      error: (error: unknown) => {
         this.errorMessage = 'Failed to load tasks';
         console.error('Error loading tasks:', error);
-      }
+        this.tasks.set([]);
+        this.applyFilters();
+        this.isLoading = false;
+      },
     });
-    this.isLoading = false;
-
   }
 
   applyFilters(): void {
-    let filtered = [...this.tasks()];
+    const raw = this.tasks();
+    const list = Array.isArray(raw) ? raw : [];
+    let filtered = [...list];
 
     // Filter by status
     if (this.filterStatus() !== 'ALL') {

@@ -15,11 +15,22 @@ import { environment } from '../../environments/environment';
 export interface CreateTaskDto {
   title: string;
   description: string;
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
+  status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   dueDate: string;
-  workspaceId: string;
+  workspaceId: number;
   assignedToId?: number;
+}
+
+/** Payload for PATCH /tasks/:id - backend accepts assignedToId, not full assignedTo */
+export interface UpdateTaskDto {
+  title?: string;
+  description?: string;
+  status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+  dueDate?: string;
+  workspaceId?: number;
+  assignedToId?: number | null;
 }
 
 @Injectable({
@@ -41,25 +52,20 @@ export class TaskService {
    * @returns Observable with array of tasks
    */
   getAll(filters?: {
-    workspaceId?: string;
+    workspaceId?: number | string;
     status?: string;
     priority?: string;
     assignedToId?: number;
   }): Observable<Task[]> {
     let params = new HttpParams();
-    
     if (filters) {
-      if (filters.workspaceId) params = params.set('workspaceId', filters.workspaceId);
+      if (filters.workspaceId != null) params = params.set('workspaceId', String(filters.workspaceId));
       if (filters.status) params = params.set('status', filters.status);
       if (filters.priority) params = params.set('priority', filters.priority);
-      if (filters.assignedToId) params = params.set('assignedToId', filters.assignedToId.toString());
+      if (filters.assignedToId != null) params = params.set('assignedToId', String(filters.assignedToId));
     }
-
-    return this.http.get<Task[]>(this.apiUrl, {
-      params,
-      withCredentials: true
-    }).pipe(
-      tap(tasks => this.tasks.set(tasks))
+    return this.http.get<Task[]>(this.apiUrl, { params, withCredentials: true }).pipe(
+      tap((tasks) => this.tasks.set(tasks)),
     );
   }
 
@@ -97,9 +103,9 @@ export class TaskService {
    * @param task - Partial task data to update
    * @returns Observable with updated task
    */
-  update(id: number, task: Partial<Task>): Observable<Task> {
+  update(id: number, task: UpdateTaskDto): Observable<Task> {
     return this.http.patch<Task>(`${this.apiUrl}/${id}`, task, {
-      withCredentials: true
+      withCredentials: true,
     });
   }
 

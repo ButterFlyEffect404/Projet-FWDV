@@ -54,11 +54,11 @@
           <div class="workspace-icon">💼</div>
           <div class="workspace-name-section">
             <h3 class="workspace-name">{{ workspace.name }}</h3>
-            <p class="workspace-id">ID: {{ workspace.id.substring(0, 8) }}...</p>
+            <p class="workspace-id">ID: {{ workspace.id }}</p>
           </div>
         </div>
 
-        <p class="workspace-description">{{ workspace.description }}</p>
+        <p class="workspace-description">{{ workspace.description ?? 'No description' }}</p>
 
         <div class="workspace-meta">
           <div class="meta-item">

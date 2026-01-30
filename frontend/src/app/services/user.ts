@@ -11,7 +11,7 @@
  */
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { User } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
@@ -38,11 +38,18 @@ export class UserService {
    * @returns Observable with array of users
    */
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl, {
-      withCredentials: true // Include cookies for authenticated requests
-    }).pipe(
-      tap(users => this.users.set(users)) // Update signal with fetched users
-    );
+    return this.http
+      .get<User[] | { success?: boolean; data?: User[] }>(this.apiUrl, {
+        withCredentials: true,
+      })
+      .pipe(
+        map((res) => {
+          if (Array.isArray(res)) return res;
+          if (res?.data && Array.isArray(res.data)) return res.data;
+          return [];
+        }),
+        tap((users) => this.users.set(users)),
+      );
   }
 
   /**
