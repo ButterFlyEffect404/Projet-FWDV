@@ -1,6 +1,6 @@
 import { User } from "src/user/entities/user.entity";
 import { Workspace } from "src/workspace/entities/workspace.entity";
-import {Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
 
 @Entity()
 export class Task {
@@ -36,6 +36,7 @@ export class Task {
 @ManyToOne(() => Workspace, workspace => workspace.tasks, {
   onDelete: 'CASCADE',
 })
+@JoinColumn({ name: 'workspace_id' })
 workspace: Workspace;
 
     @ManyToOne(() => User)

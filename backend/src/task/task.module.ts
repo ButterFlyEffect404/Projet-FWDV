@@ -7,7 +7,7 @@ import { Workspace } from 'src/workspace/entities/workspace.entity';
 import { User } from 'src/user/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task,Workspace,User])],
+  imports: [TypeOrmModule.forFeature([Task , Workspace , User])],
   controllers: [TaskController],
   providers: [TaskService],
 })

@@ -23,16 +23,27 @@ export class TaskService{
     private readonly userRepo: Repository<User>,
   ) {}
   async create(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-    const workspaceId=createTaskDto.workspaceId;
-    const workspace = await this.workspaceRepo.findOne({where: {id: workspaceId}});
+    const workspaceId = createTaskDto.workspaceId;
+    const workspace = await this.workspaceRepo.findOne({ where: { id: workspaceId } });
     if (!workspace) {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`);
-    }       
+    }
 
+    let assignedTo: User | undefined;
+    if (createTaskDto.assignedToId) {
+      const assignee = await this.userRepo.findOne({ where: { id: createTaskDto.assignedToId } });
+      if (!assignee) {
+        throw new NotFoundException(`User with ID ${createTaskDto.assignedToId} not found`);
+      }
+      assignedTo = assignee;
+    }
+
+    const { assignedToId, workspaceId: _wid, ...rest } = createTaskDto;
     const task = this.taskRepo.create({
-      ...createTaskDto,
-        workspace: workspace, // Set the workspace relation
-      createdBy: user, // Set the createdBy field to the authenticated user
+      ...rest,
+      workspace,
+      createdBy: user,
+      ...(assignedTo ? { assignedTo } : {}),
     });
     return await this.taskRepo.save(task);
   }
@@ -51,11 +62,21 @@ export class TaskService{
     }       
     return task;
   } 
-    async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
-      const task = await this.findOne(id);
-      Object.assign(task, updateTaskDto);
-      return await this.taskRepo.save(task);
+  async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
+    const task = await this.findOne(id);
+    const { assignedToId, ...rest } = updateTaskDto as UpdateTaskDto & { assignedToId?: number };
+    Object.assign(task, rest);
+    if (assignedToId !== undefined) {
+      if (assignedToId == null) {
+        task.assignedTo = null as any;
+      } else {
+        const user = await this.userRepo.findOne({ where: { id: assignedToId } });
+        if (!user) throw new NotFoundException(`User with ID ${assignedToId} not found`);
+        task.assignedTo = user;
+      }
     }
+    return await this.taskRepo.save(task);
+  }
     async remove(id: number): Promise<{ count: number }> {
       const deleteResult = await this.taskRepo.softDelete(id);
         if (!deleteResult.affected) {   

@@ -210,12 +210,19 @@ export class Auth {
     if (!this.isBrowser) {
       return null;
     }
-    
+
     try {
       const userJson = localStorage.getItem(this.USER_KEY);
-      return userJson ? JSON.parse(userJson) : null;
+      if (!userJson || userJson === 'undefined' || userJson === 'null') {
+        if (userJson != null) {
+          localStorage.removeItem(this.USER_KEY);
+        }
+        return null;
+      }
+      return JSON.parse(userJson) as User;
     } catch (error) {
       console.error('Error parsing user from storage:', error);
+      localStorage.removeItem(this.USER_KEY);
       return null;
     }
   }

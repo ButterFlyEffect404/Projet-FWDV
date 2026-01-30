@@ -137,14 +137,14 @@
               <div class="member-info">
                 <p class="member-name">{{ member.firstName }} {{ member.lastName }}</p>
                 <p class="member-email">{{ member.email }}</p>
-                <p class="member-role" [class.owner]="member.id.toString() === workspace()!.ownerId">
-                  {{ member.id.toString() === workspace()!.ownerId ? 'Owner' : 'Member' }}
+                <p class="member-role" [class.owner]="member.id === workspace()!.ownerId">
+                  {{ member.id === workspace()!.ownerId ? 'Owner' : 'Member' }}
                 </p>
               </div>
               <button 
-                *ngIf="member.id.toString() !== workspace()!.ownerId"
+                *ngIf="member.id !== workspace()!.ownerId"
                 class="btn-remove"
-                (click)="removeMember(member.id.toString())"
+                (click)="removeMember(member.id)"
                 title="Remove member"
               >
                 ✕
@@ -200,7 +200,7 @@
                 {{ task.dueDate | date: 'MMM d, y' }}
               </td>
               <td class="task-assigned">
-                {{ task.assignedTo ? getUserName(task.assignedTo) : 'Unassigned' }}
+                {{ task.assignedTo ? getUserName(task.assignedTo.id) : 'Unassigned' }}
               </td>
             </tr>
           </tbody>

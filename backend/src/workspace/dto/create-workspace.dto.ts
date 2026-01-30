@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MaxLength, MinLength, IsArray, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateWorkspaceDto {
   @IsString()
@@ -11,4 +12,10 @@ export class CreateWorkspaceDto {
   @IsOptional()
   @MaxLength(1000)
   description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Type(() => Number)
+  members?: number[];
 }

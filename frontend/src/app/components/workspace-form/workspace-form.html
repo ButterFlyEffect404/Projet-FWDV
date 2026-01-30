@@ -90,8 +90,8 @@
               <input
                 type="checkbox"
                 [id]="'member-' + member.id"
-                [checked]="isMemberSelected(member.id.toString())"
-                (change)="toggleMember(member.id.toString())"
+                [checked]="isMemberSelected(member.id)"
+                (change)="toggleMember(member.id)"
                 class="checkbox-input"
               />
               <label [for]="'member-' + member.id" class="checkbox-label">

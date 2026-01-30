@@ -40,27 +40,25 @@ export class WorkspaceDetail {
   }
 
   loadWorkspace(): void {
-    this.isLoading = true;
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.workspaceService.getById(id).subscribe({
-        next: (data) => {
-          console.log('Workspace data loaded:', data);
-          this.workspace.set(data);
-          this.editForm.set({
-            name: data.name,
-            description: data.description
-          });
-          // Load tasks for this workspace
-          this.loadWorkspaceTasks(id);
-        },
-        error: (error) => {
-          this.errorMessage = 'Failed to load workspace';
-          console.error('Error loading workspace:', error);
-        }
-      });
-      this.isLoading = false;
-    }
+    if (!id) return;
+    this.isLoading = true;
+    this.workspaceService.getById(id).subscribe({
+      next: (data) => {
+        this.workspace.set(data);
+        this.editForm.set({
+          name: data.name,
+          description: data.description ?? '',
+        });
+        this.loadWorkspaceTasks(id);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Failed to load workspace';
+        console.error('Error loading workspace:', error);
+        this.isLoading = false;
+      },
+    });
   }
 
   loadWorkspaceTasks(workspaceId: number | string): void {
@@ -92,13 +90,13 @@ export class WorkspaceDetail {
   get memberUsers(): User[] {
     const ws = this.workspace();
     if (!ws) return [];
-    return this.allUsers().filter(user => ws.members.includes(user.id.toString()));
+    return this.allUsers().filter((user) => ws.members.includes(user.id));
   }
 
   get availableUsers(): User[] {
     const ws = this.workspace();
     if (!ws) return [];
-    return this.allUsers().filter(user => !ws.members.includes(user.id.toString()));
+    return this.allUsers().filter((user) => !ws.members.includes(user.id));
   }
 
   // Helper method to get user name by ID
@@ -118,7 +116,7 @@ export class WorkspaceDetail {
   addMemberToWorkspace(userId: number): void {
     const ws = this.workspace();
     if (ws) {
-      this.workspaceService.addMember(ws.id, userId.toString()).subscribe({
+      this.workspaceService.addMember(ws.id, userId).subscribe({
         next: () => {
           this.loadWorkspace();
           this.closeAddMemberModal();
@@ -138,7 +136,7 @@ export class WorkspaceDetail {
       if (ws) {
         this.editForm.set({
           name: ws.name,
-          description: ws.description
+          description: ws.description ?? ''
         });
       }
     }
@@ -188,7 +186,7 @@ export class WorkspaceDetail {
     }
   }
 
-  removeMember(userId: string): void {
+  removeMember(userId: number | string): void {
     const ws = this.workspace();
     if (ws) {
       this.workspaceService.removeMember(ws.id, userId).subscribe({

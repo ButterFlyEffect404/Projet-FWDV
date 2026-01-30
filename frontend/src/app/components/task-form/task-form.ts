@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TaskService } from '../../services/task';
+import { TaskService, CreateTaskDto, UpdateTaskDto } from '../../services/task';
 import { WorkspaceService } from '../../services/workspace';
 import { UserService } from '../../services/user';
 import { Task } from '../../models/task.model';
@@ -27,7 +27,7 @@ export class TaskForm implements OnInit {
   // Dropdown data
   workspaces = signal<Workspace[]>([]);
   users = signal<User[]>([]);
-  preselectedWorkspaceId: number | null = null;
+  preselectedWorkspaceId: number | string | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -46,10 +46,12 @@ export class TaskForm implements OnInit {
     this.loadUsers();
     
     // Check for preselected workspace from query params
-    this.route.queryParams.subscribe(params => {
-      if (params['workspaceId']) {
-        this.preselectedWorkspaceId = parseInt(params['workspaceId'], 10);
-        this.taskForm.patchValue({ workspaceId: parseInt(params['workspaceId'], 10) });
+    this.route.queryParams.subscribe((params) => {
+      const wid = params['workspaceId'];
+      if (wid != null && wid !== '') {
+        this.preselectedWorkspaceId = wid;
+        const num = Number(wid);
+        this.taskForm.patchValue({ workspaceId: isNaN(num) ? wid : num });
       }
     });
     
@@ -80,23 +82,29 @@ export class TaskForm implements OnInit {
 
   loadWorkspaces(): void {
     this.workspaceService.getAll().subscribe({
-      next: (data: Workspace[]) => {
-        this.workspaces.set(data);
+      next: (data: unknown) => {
+        const list = Array.isArray(data) ? data : (data as { data?: unknown[] })?.data ?? [];
+        const arr = Array.isArray(list) ? list : [];
+        setTimeout(() => this.workspaces.set(arr), 0);
       },
-      error: (error: any) => {
+      error: (error: unknown) => {
         console.error('Error loading workspaces:', error);
-      }
+        setTimeout(() => this.workspaces.set([]), 0);
+      },
     });
   }
 
   loadUsers(): void {
     this.userService.getAllUsers().subscribe({
-      next: (data: User[]) => {
-        this.users.set(data);
+      next: (data: unknown) => {
+        const list = Array.isArray(data) ? data : (data as { data?: unknown[] })?.data ?? [];
+        const arr = Array.isArray(list) ? list : [];
+        setTimeout(() => this.users.set(arr), 0);
       },
-      error: (error: any) => {
+      error: (error: unknown) => {
         console.error('Error loading users:', error);
-      }
+        setTimeout(() => this.users.set([]), 0);
+      },
     });
   }
 
@@ -104,14 +112,15 @@ export class TaskForm implements OnInit {
     this.isLoading.set(true);
     this.taskService.getById(id).subscribe({
       next: (task: Task) => {
+        const workspaceId = task.workspaceId ?? task.workspace?.id;
         this.taskForm.patchValue({
           title: task.title,
           description: task.description,
           status: task.status,
           priority: task.priority,
           dueDate: this.formatDateForInput(task.dueDate),
-          workspaceId: task.workspaceId,
-          assignedToId: task.assignedTo?.id || ''
+          workspaceId: workspaceId ?? '',
+          assignedToId: task.assignedTo?.id ?? '',
         });
         this.isLoading.set(false);
       },
@@ -134,20 +143,20 @@ export class TaskForm implements OnInit {
     this.successMessage.set('');
 
     const formData = this.taskForm.value;
-    const taskData = {
-      title: formData.title,
-      description: formData.description,
-      status: formData.status,
-      priority: formData.priority,
-      dueDate: formData.dueDate,
-      workspaceId: parseInt(formData.workspaceId, 10),
-      assignedToId: formData.assignedToId ? parseInt(formData.assignedToId, 10) : undefined,
-      createdBy: 3 ,
-    };
+    const workspaceId = Number(formData.workspaceId);
+    const assignedToId = formData.assignedToId ? Number(formData.assignedToId) : undefined;
 
     if (this.isEditMode() && this.taskId) {
-      // Update task
-      this.taskService.update(this.taskId, taskData).subscribe({
+      const updateData: UpdateTaskDto = {
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        dueDate: formData.dueDate,
+        workspaceId: isNaN(workspaceId) ? undefined : workspaceId,
+        assignedToId: assignedToId ?? null,
+      };
+      this.taskService.update(this.taskId, updateData).subscribe({
         next: () => {
           this.isSaving.set(false);
           this.successMessage.set('Task updated successfully!');
@@ -157,11 +166,19 @@ export class TaskForm implements OnInit {
           this.isSaving.set(false);
           this.errorMessage.set('Failed to update task');
           console.error('Error updating task:', error);
-        }
+        },
       });
     } else {
-      // Create new task
-      this.taskService.create(taskData).subscribe({
+      const createData: CreateTaskDto = {
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        dueDate: formData.dueDate,
+        workspaceId: isNaN(workspaceId) ? 0 : workspaceId,
+        assignedToId,
+      };
+      this.taskService.create(createData).subscribe({
         next: () => {
           this.isSaving.set(false);
           this.successMessage.set('Task created successfully!');

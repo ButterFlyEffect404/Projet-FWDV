@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 import { Workspace } from '../models/workspace.model';
 import { Task } from '../models/task.model';
 import { environment } from '../../environments/environment';
+
+export interface WorkspaceListResponse {
+  data: Workspace[];
+  total: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -13,51 +18,65 @@ export class WorkspaceService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Workspace[]> {
-    return this.http.get<Workspace[]>(this.apiUrl, {
-      withCredentials: true
-    });
+  getAll(page: number = 1, limit: number = 100): Observable<Workspace[]> {
+    const params = new HttpParams().set('page', page).set('limit', limit);
+    return this.http
+      .get<WorkspaceListResponse | { success?: boolean; data?: Workspace[] | WorkspaceListResponse }>(this.apiUrl, {
+        params,
+        withCredentials: true,
+      })
+      .pipe(
+        map((res) => {
+          const d = res?.data;
+          if (Array.isArray(d)) return d;
+          if (d && typeof d === 'object' && 'data' in d && Array.isArray((d as WorkspaceListResponse).data)) {
+            return (d as WorkspaceListResponse).data;
+          }
+          return [];
+        }),
+      );
   }
 
   getById(id: number | string): Observable<Workspace> {
     return this.http.get<Workspace>(`${this.apiUrl}/${id}`, {
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
-  create(workspace: Omit<Workspace, 'id' | 'createdAt' | 'updatedAt'>): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, workspace, {
-      withCredentials: true
+  create(workspace: { name: string; description?: string; members?: number[] }): Observable<Workspace> {
+    return this.http.post<Workspace>(`${this.apiUrl}`, workspace, {
+      withCredentials: true,
     });
   }
 
-  update(id: number | string, workspace: Partial<Workspace>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, workspace, {
-      withCredentials: true
+  update(id: number | string, workspace: Partial<Pick<Workspace, 'name' | 'description' | 'members'>>): Observable<Workspace> {
+    return this.http.patch<Workspace>(`${this.apiUrl}/${id}`, workspace, {
+      withCredentials: true,
     });
   }
 
-  delete(id: number | string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      withCredentials: true
+  delete(id: number | string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      withCredentials: true,
     });
   }
 
-  addMember(workspaceId: number | string, userId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${workspaceId}/members`, { userId : Number(userId) }, {
-      withCredentials: true
+  addMember(workspaceId: number | string, userId: number | string): Observable<Workspace> {
+    return this.http.post<Workspace>(`${this.apiUrl}/${workspaceId}/members`, { userId: Number(userId) }, {
+      withCredentials: true,
     });
   }
 
-  removeMember(workspaceId: number | string, userId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${workspaceId}/members/${userId}`, {
-      withCredentials: true
+  removeMember(workspaceId: number | string, userId: number | string): Observable<Workspace> {
+    return this.http.delete<Workspace>(`${this.apiUrl}/${workspaceId}/members/${userId}`, {
+      withCredentials: true,
     });
   }
 
   getWorkspaceTasks(workspaceId: number | string): Observable<Task[]> {
+  getWorkspaceTasks(workspaceId: number | string): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.apiUrl}/${workspaceId}/tasks`, {
-      withCredentials: true
+      withCredentials: true,
     });
   }
 }
