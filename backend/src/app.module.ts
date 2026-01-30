@@ -25,6 +25,8 @@ import { LoggerMiddleware } from './common/middleware/logger/logger.middleware';
       database: process.env.DB_NAME,
       entities: [Task, User],
       synchronize: true, 
+      autoLoadEntities: true,
+      
     }),
     UserModule, 
     AuthModule,
