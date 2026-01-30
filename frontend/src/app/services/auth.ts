@@ -173,11 +173,11 @@ export class Auth {
    * Handle successful authentication (login/register)
    * @param response - Auth response from backend
    */
-  private handleAuthSuccess(response: AuthResponse): void {
+  private handleAuthSuccess(response : any): void {
     // Store user data locally (not the token - it's in the cookie)
-    this.currentUser.set(response.user);
+    this.currentUser.set(response.data.user);
     this.isLoggedIn.set(true);
-    this.saveUserToStorage(response.user);
+    this.saveUserToStorage(response.data.user);
   }
 
   /**
