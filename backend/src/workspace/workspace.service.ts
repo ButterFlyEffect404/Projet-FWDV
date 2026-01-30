@@ -18,11 +18,19 @@ export class WorkspaceService {
     private taskRepository: Repository<Task>,
   ) {}
 
-  async create(createWorkspaceDto: CreateWorkspaceDto, user: User): Promise<Workspace> {
+  async create(createWorkspaceDto: CreateWorkspaceDto, user: any): Promise<Workspace> {
     const { members, ...rest } = createWorkspaceDto;
+
+    // Ensure we attach a proper User entity as owner, not just the JWT payload
+    const ownerId = user.id ?? user.userId;
+    const owner = await this.userRepository.findOne({ where: { id: ownerId } });
+    if (!owner) {
+      throw new NotFoundException(`Owner user with ID ${ownerId} not found`);
+    }
+
     const workspace = this.workspaceRepository.create({
       ...rest,
-      owner: user,
+      owner,
     });
     const saved = await this.workspaceRepository.save(workspace);
     if (members?.length) {
@@ -63,9 +71,10 @@ export class WorkspaceService {
     });
   }
 
-  async addMember(workspaceId: number, userId: number, currentUser: User): Promise<Workspace> {
+  async addMember(workspaceId: number, userId: number, currentUser: any): Promise<Workspace> {
     const workspace = await this.findOne(workspaceId);
-    if (workspace.owner.id !== currentUser.id) {
+    const currentUserId = currentUser.id ?? currentUser.userId;
+    if (!workspace.owner || workspace.owner.id !== currentUserId) {
       throw new BadRequestException('Only workspace owner can add members');
     }
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -77,9 +86,10 @@ export class WorkspaceService {
     return this.findOne(workspaceId);
   }
 
-  async removeMember(workspaceId: number, userId: number, currentUser: User): Promise<Workspace> {
+  async removeMember(workspaceId: number, userId: number, currentUser: any): Promise<Workspace> {
     const workspace = await this.findOne(workspaceId);
-    if (workspace.owner.id !== currentUser.id) {
+    const currentUserId = currentUser.id ?? currentUser.userId;
+    if (!workspace.owner || workspace.owner.id !== currentUserId) {
       throw new BadRequestException('Only workspace owner can remove members');
     }
     workspace.users = workspace.users?.filter((u) => u.id !== userId) ?? [];
@@ -87,10 +97,11 @@ export class WorkspaceService {
     return this.findOne(workspaceId);
   }
 
-  async update(id: number, user: User, updateWorkspaceDto: UpdateWorkspaceDto): Promise<Workspace> {
+  async update(id: number, user: any, updateWorkspaceDto: UpdateWorkspaceDto): Promise<Workspace> {
     const workspace = await this.findOne(id);
 
-    if (workspace.owner.id !== user.id) {
+    const userId = user.id ?? user.userId;
+    if (!workspace.owner || workspace.owner.id !== userId) {
       throw new BadRequestException('Only workspace owner can update it');
     }
 
@@ -103,10 +114,12 @@ export class WorkspaceService {
     return this.workspaceRepository.save(workspace).then(() => this.findOne(id));
   }
 
-  async remove(id: number, user: User): Promise<void> {
+  async remove(id: number, user: any): Promise<void> {
     const workspace = await this.findOne(id);
 
-    if (workspace.owner.id !== user.id) {
+    // If an owner is set, only the owner can delete
+    const userId = user.id ?? user.userId;
+    if (workspace.owner && workspace.owner.id !== userId) {
       throw new BadRequestException('Only workspace owner can delete it');
     }
 

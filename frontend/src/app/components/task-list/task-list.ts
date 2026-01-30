@@ -171,6 +171,12 @@ export class TaskList {
   }
 
   deleteTask(taskId: number): void {
+    if (taskId === null || taskId === undefined || isNaN(taskId)) {
+      this.errorMessage = 'Invalid task id. Please refresh and try again.';
+      console.error('Attempted to delete task with invalid id:', taskId);
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this task?')) {
       this.taskService.delete(taskId).subscribe({
         next: () => {

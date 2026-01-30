@@ -113,7 +113,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Total Members</span>
-              <span class="info-value">{{ workspace()!.members.length }}</span>
+              <span class="info-value">{{ (workspace()!.members || []).length }}</span>
             </div>
           </div>
         </div>

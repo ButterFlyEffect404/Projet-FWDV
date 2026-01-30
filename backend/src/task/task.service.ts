@@ -77,13 +77,15 @@ export class TaskService{
     }
     return await this.taskRepo.save(task);
   }
-    async remove(id: number): Promise<{ count: number }> {
-      const deleteResult = await this.taskRepo.softDelete(id);
-        if (!deleteResult.affected) {   
-        throw new NotFoundException(`Task with ID ${id} not found`);
-        }
-        return { count: deleteResult.affected };
+
+  async remove(id: number): Promise<{ count: number }> {
+    // Use hard delete because Task entity does not have a DeleteDateColumn
+    const deleteResult = await this.taskRepo.delete(id);
+    if (!deleteResult.affected) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
     }
+    return { count: deleteResult.affected };
+  }
     
 //         assignedToId, 
 //         createdById,

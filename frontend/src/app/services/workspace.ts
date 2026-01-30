@@ -39,9 +39,18 @@ export class WorkspaceService {
   }
 
   getById(id: number | string): Observable<Workspace> {
-    return this.http.get<Workspace>(`${this.apiUrl}/${id}`, {
-      withCredentials: true,
-    });
+    return this.http
+      .get<Workspace | { success?: boolean; data?: Workspace }>(`${this.apiUrl}/${id}`, {
+        withCredentials: true,
+      })
+      .pipe(
+        map((res) => {
+          if (res && typeof res === 'object' && 'data' in res && (res as any).data) {
+            return (res as any).data as Workspace;
+          }
+          return res as Workspace;
+        }),
+      );
   }
 
   create(workspace: { name: string; description?: string; members?: number[] }): Observable<Workspace> {

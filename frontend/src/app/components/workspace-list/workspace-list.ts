@@ -77,6 +77,12 @@ export class WorkspaceList {
   }
 
   deleteWorkspace(id: number | string): void {
+    if (id === null || id === undefined || (typeof id === 'number' && isNaN(id))) {
+      this.errorMessage = 'Invalid workspace id. Please refresh and try again.';
+      console.error('Attempted to delete workspace with invalid id:', id);
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this workspace?')) {
       this.workspaceService.delete(id).subscribe({
         next: () => {

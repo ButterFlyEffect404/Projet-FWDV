@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WorkspaceService } from '../../services/workspace';
 import { UserService } from '../../services/user';
@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './workspace-detail.html',
   styleUrl: './workspace-detail.css',
 })
-export class WorkspaceDetail {
+export class WorkspaceDetail implements OnInit {
   workspace = signal<Workspace | null>(null);
   tasks = signal<Task[]>([]);
   allUsers = signal<User[]>([]);
@@ -35,22 +35,31 @@ export class WorkspaceDetail {
     private route: ActivatedRoute,
     private cdRef: ChangeDetectorRef
   ) {
-    this.loadWorkspace();
+    // initialization moved to ngOnInit to react to route param changes
+  }
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      if (id) {
+        this.loadWorkspace(id);
+      }
+    });
     this.loadAllUsers();
   }
 
-  loadWorkspace(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return;
+  loadWorkspace(id?: number | string | null): void {
+    const routeId = id ?? this.route.snapshot.paramMap.get('id');
+    if (!routeId) return;
     this.isLoading = true;
-    this.workspaceService.getById(id).subscribe({
+    this.workspaceService.getById(routeId).subscribe({
       next: (data) => {
         this.workspace.set(data);
         this.editForm.set({
           name: data.name,
           description: data.description ?? '',
         });
-        this.loadWorkspaceTasks(id);
+        this.loadWorkspaceTasks(routeId);
         this.isLoading = false;
       },
       error: (error) => {
@@ -90,18 +99,30 @@ export class WorkspaceDetail {
   get memberUsers(): User[] {
     const ws = this.workspace();
     if (!ws) return [];
-    return this.allUsers().filter((user) => ws.members.includes(user.id));
+    const members = ws.members ?? [];
+    return this.allUsers().filter((user) => members.includes(user.id));
   }
 
   get availableUsers(): User[] {
     const ws = this.workspace();
     if (!ws) return [];
-    return this.allUsers().filter((user) => !ws.members.includes(user.id));
+    const members = ws.members ?? [];
+    return this.allUsers().filter((user) => !members.includes(user.id));
   }
 
   // Helper method to get user name by ID
   getUserName(userId: number | string): string {
-    const user = this.allUsers().find(u => u.id.toString() === userId.toString());
+    if (userId === null || userId === undefined) {
+      return 'Unknown';
+    }
+
+    const users = this.allUsers();
+    if (!users || users.length === 0) {
+      return 'Unknown';
+    }
+
+    const targetId = String(userId);
+    const user = users.find((u) => u && u.id !== null && u.id !== undefined && String(u.id) === targetId);
     return user ? `${user.firstName} ${user.lastName}` : 'Unknown';
   }
 
@@ -173,7 +194,13 @@ export class WorkspaceDetail {
 
   deleteWorkspace(): void {
     const ws = this.workspace();
-    if (ws && confirm('Are you sure you want to delete this workspace?')) {
+    if (!ws || ws.id === null || ws.id === undefined || (typeof ws.id === 'number' && isNaN(ws.id))) {
+      this.errorMessage = 'Invalid workspace id. Please refresh and try again.';
+      console.error('Attempted to delete workspace with invalid id from detail view:', ws?.id, ws);
+      return;
+    }
+
+    if (confirm('Are you sure you want to delete this workspace?')) {
       this.workspaceService.delete(ws.id).subscribe({
         next: () => {
           this.router.navigate(['/workspaces']);
